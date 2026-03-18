@@ -1,4 +1,4 @@
-package com.jins.user.constants;
+package com.jins.aimentor.constants;
 
 /**
  * Redis 常量

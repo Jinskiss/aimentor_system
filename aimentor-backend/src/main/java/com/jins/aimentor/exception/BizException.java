@@ -1,6 +1,6 @@
-package com.jins.exception;
+package com.jins.aimentor.exception;
 
-import com.jins.constants.Status;
+import com.jins.aimentor.constants.Status;
 
 /**
  * 业务异常

@@ -1,6 +1,6 @@
-package com.jins.user.config;
+package com.jins.aimentor.config;
 
-import com.jins.user.interceptor.JwtInterceptor;
+import com.jins.aimentor.interceptor.JwtInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;

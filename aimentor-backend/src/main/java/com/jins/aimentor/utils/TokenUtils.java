@@ -1,16 +1,16 @@
-package com.jins.user.utils;
+package com.jins.aimentor.utils;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
-import com.jins.user.constants.Status;
-import com.jins.user.exception.BizException;
-import com.jins.user.domain.entity.User;
+import com.jins.aimentor.constants.Status;
+import com.jins.aimentor.domain.entity.User;
+import com.jins.aimentor.exception.BizException;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import jakarta.servlet.http.HttpServletRequest;
 import java.util.Objects;
 
 /**

@@ -15,6 +15,14 @@
         <el-form-item label="邮箱">
           <el-input v-model="form.email" />
         </el-form-item>
+	      <!-- 新增角色选择 -->
+        <el-form-item label="角色">
+          <el-select v-model="form.role" placeholder="请选择角色">
+            <el-option label="学生" value="student"></el-option>
+            <el-option label="教师" value="teacher"></el-option>
+            <el-option label="管理员" value="admin"></el-option>
+          </el-select>
+        </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="handleRegister" :loading="loading">注册</el-button>
           <el-button @click="$router.push('/login')">返回登录</el-button>

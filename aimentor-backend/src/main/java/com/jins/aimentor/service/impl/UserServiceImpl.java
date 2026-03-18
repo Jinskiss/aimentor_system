@@ -1,26 +1,26 @@
-package com.jins.user.service.impl;
+package com.jins.aimentor.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.jins.user.constants.Status;
-import com.jins.user.exception.BizException;
-import com.jins.user.constants.RedisConstants;
-import com.jins.user.domain.entity.User;
-import com.jins.user.domain.form.LoginForm;
-import com.jins.user.domain.form.RegistForm;
-import com.jins.user.domain.vo.UserVO;
-import com.jins.user.mapper.UserMapper;
-import com.jins.user.service.UserService;
-import com.jins.user.utils.TokenUtils;
-import com.jins.user.utils.UserHolder;
+import com.jins.aimentor.constants.RedisConstants;
+import com.jins.aimentor.constants.Status;
+import com.jins.aimentor.domain.dto.LoginDto;
+import com.jins.aimentor.domain.dto.RegistDto;
+import com.jins.aimentor.domain.entity.User;
+import com.jins.aimentor.domain.vo.UserVO;
+import com.jins.aimentor.exception.BizException;
+import com.jins.aimentor.mapper.UserMapper;
+import com.jins.aimentor.service.UserService;
+import com.jins.aimentor.utils.TokenUtils;
+import com.jins.aimentor.utils.UserHolder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
@@ -39,7 +39,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      */
     @Override
     @Transactional()
-    public User register(RegistForm registForm) {
+    public User register(RegistDto registForm) {
         log.info("用户注册，用户名: {}", registForm.getUsername());
 
         //查询用户
@@ -106,7 +106,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      * @return 用户信息
      */
     @Override
-    public String login(LoginForm loginForm) {
+    public String login(LoginDto loginForm) {
         log.info("用户登录，用户名: {}", loginForm.getUsername());
 
         //查询用户

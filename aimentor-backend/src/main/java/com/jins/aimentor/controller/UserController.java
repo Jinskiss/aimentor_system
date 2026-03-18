@@ -1,12 +1,12 @@
-package com.jins.user.controller;
+package com.jins.aimentor.controller;
 
-import com.jins.user.common.Result;
-import com.jins.user.domain.entity.User;
-import com.jins.user.domain.form.LoginForm;
-import com.jins.user.domain.form.RegistForm;
-import com.jins.user.domain.vo.UserVO;
-import com.jins.user.service.UserService;
-import com.jins.user.utils.UserHolder;
+import com.jins.aimentor.common.Result;
+import com.jins.aimentor.domain.dto.LoginDto;
+import com.jins.aimentor.domain.dto.RegistDto;
+import com.jins.aimentor.domain.entity.User;
+import com.jins.aimentor.domain.vo.UserVO;
+import com.jins.aimentor.service.UserService;
+import com.jins.aimentor.utils.UserHolder;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
@@ -36,7 +36,7 @@ public class UserController {
      */
     @ApiOperation("用户注册接口")
     @PostMapping("/user/register")
-    public Result<User> register(@Validated @RequestBody RegistForm registForm) {
+    public Result<User> register(@Validated @RequestBody RegistDto registForm) {
         log.info("用户注册接口");
 
         if (registForm.getPassword() == null || registForm.getPassword().isEmpty()) {
@@ -53,7 +53,7 @@ public class UserController {
      */
     @ApiOperation("用户登录接口")
     @PostMapping("/user/login")
-    public Result<String> login(@RequestBody LoginForm request) {
+    public Result<String> login(@RequestBody LoginDto request) {
         log.info("用户登录接口");
 
         String token = userService.login(request);

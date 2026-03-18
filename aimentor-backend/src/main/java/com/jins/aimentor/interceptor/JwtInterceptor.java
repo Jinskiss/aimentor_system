@@ -1,14 +1,14 @@
-package com.jins.user.interceptor;
+package com.jins.aimentor.interceptor;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
-import com.jins.user.constants.Status;
-import com.jins.user.exception.BizException;
-import com.jins.user.constants.RedisConstants;
-import com.jins.user.domain.entity.User;
-import com.jins.user.utils.UserHolder;
+import com.jins.aimentor.constants.RedisConstants;
+import com.jins.aimentor.constants.Status;
+import com.jins.aimentor.domain.entity.User;
+import com.jins.aimentor.exception.BizException;
+import com.jins.aimentor.utils.UserHolder;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
