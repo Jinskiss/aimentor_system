@@ -1,12 +1,17 @@
 package com.jins.aimentor.domain.entity;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
+/**
+ * 用户实体类
+ *
+ * <p>对应数据库表：t_user</p>
+ * <p>使用MyBatis-Plus注解进行表映射和字段填充配置</p>
+ *
+ */
 @TableName("user")
 @Data
 public class User {
@@ -49,7 +54,24 @@ public class User {
     private String phone;
 
     /**
-     * 创建时间 - 自动记录创建时间戳
+     * 创建时间
+     * <p>插入时自动填充</p>
      */
-    private Date createTime;
+    @TableField(fill = FieldFill.INSERT)
+    private LocalDateTime createTime;
+
+    /**
+     * 更新时间
+     * <p>插入和更新时自动填充</p>
+     */
+    @TableField(fill = FieldFill.INSERT_UPDATE)
+    private LocalDateTime updateTime;
+
+    /**
+     * 逻辑删除标志
+     * <p>0-未删除，1-已删除</p>
+     */
+    @TableLogic
+    @TableField(fill = FieldFill.INSERT)
+    private Integer deleted;
 }

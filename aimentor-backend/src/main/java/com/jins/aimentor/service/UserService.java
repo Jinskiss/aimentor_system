@@ -28,35 +28,4 @@ public interface UserService extends IService<User> {
      * @return
      */
     UserVO getUserInfoById(Long userId);
-
-//    /**
-//     * 通过userId查询用户信息
-//     * @param page
-//     * @param rows
-//     * @param user
-//     * @return
-//     */
-//    Page<User> pageList(int page, int rows, User user);
-//
-//    /**
-//     * 通过userId查询用户信息
-//     * @param user
-//     * @param queryUserId
-//     * @return
-//     */
-//    UserVO getUserInfo(User user, Long queryUserId);
-//
-//    /**
-//     * 重置密码
-//     * @param user
-//     * @param newPassword
-//     */
-//    void resetPassword(User user, String newPassword);
-//
-//    /**
-//     * 通过userId修改用户信息
-//     * @param user
-//     * @param updateUser
-//     */
-//    void updateUser(User user, User updateUser);
 }

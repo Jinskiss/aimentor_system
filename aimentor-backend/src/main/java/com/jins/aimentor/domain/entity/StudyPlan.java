@@ -1,39 +1,79 @@
 package com.jins.aimentor.domain.entity;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+/**
+ * 学习计划实体类
+ *
+ * <p>对应数据库表：t_study_plan</p>
+ * <p>存储学生的学习计划安排</p>
+ *
+ */
 @Data
 @TableName("study_plan")
 public class StudyPlan {
-    
-    /** 计划ID */
+
+    /**
+     * 计划ID
+     */
     @TableId(type = IdType.AUTO)
     private Long id;
-    
-    /** 学生ID */
+
+    /**
+     * 学生ID
+     * <p>关联user表，表示计划所有者</p>
+     */
     private Long studentId;
-    
-    /** 计划内容 */
+
+    /**
+     * 计划内容
+     * <p>具体的学习任务描述</p>
+     */
     private String content;
-    
-    /** 开始日期 */
+
+    /**
+     * 开始日期
+     */
     private LocalDate startDate;
-    
-    /** 结束日期 */
+
+    /**
+     * 结束日期
+     */
     private LocalDate endDate;
-    
-    /** 状态：未完成/已完成 */
+
+    /**
+     * 计划状态
+     * <p>未完成 / 已完成</p>
+     */
     private String status;
-    
-    /** 所属科目 */
+
+    /**
+     * 所属科目
+     */
     private String subject;
-    
-    /** 创建时间 */
+
+    /**
+     * 创建时间
+     * <p>插入时自动填充</p>
+     */
+    @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createTime;
+
+    /**
+     * 更新时间
+     * <p>插入和更新时自动填充</p>
+     */
+    @TableField(fill = FieldFill.INSERT_UPDATE)
+    private LocalDateTime updateTime;
+
+    /**
+     * 逻辑删除标志
+     */
+    @TableLogic
+    @TableField(fill = FieldFill.INSERT)
+    private Integer deleted;
 }

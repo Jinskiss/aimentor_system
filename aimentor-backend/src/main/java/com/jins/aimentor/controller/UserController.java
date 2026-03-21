@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/user")
 @RequiredArgsConstructor
 @Api(tags = "用户管理", description = "提供用户信息的接口")
 public class UserController {
@@ -35,7 +35,7 @@ public class UserController {
      * @return 用户信息
      */
     @ApiOperation("用户注册接口")
-    @PostMapping("/user/register")
+    @PostMapping("/register")
     public Result<User> register(@Validated @RequestBody RegistDto registForm) {
         log.info("用户注册接口");
 
@@ -52,7 +52,7 @@ public class UserController {
      * @return
      */
     @ApiOperation("用户登录接口")
-    @PostMapping("/user/login")
+    @PostMapping("/login")
     public Result<String> login(@RequestBody LoginDto request) {
         log.info("用户登录接口");
 
@@ -66,7 +66,7 @@ public class UserController {
      * @return
      */
     @ApiOperation("用户信息接口")
-    @GetMapping("/user/info")
+    @GetMapping("/info")
     public Result<UserVO> getUserInfo() {
         // 从ThreadLocal中获取当前登录用户
         User user = UserHolder.getUser();
@@ -80,110 +80,4 @@ public class UserController {
 
         return Result.success(userVO);
     }
-
-//
-//    /**
-//     * 分页查询用户列表
-//     * @param page
-//     * @param rows
-//     * @return
-//     */
-//    @ApiOperation("分页查询用户列表")
-//    @GetMapping("/users")
-//    public R<Page<UserVO>> listUsers(
-//            @RequestParam(defaultValue = "0") int page,
-//            @RequestParam(defaultValue = "10") int rows) {
-//        log.info("分页查询用户列表");
-//
-//        User user1 = UserHolder.getUser();
-//
-//        if (user1 == null) {
-//            return R.error(Status.CODE_500, "用户未登录");
-//        }
-//
-//        Page<User> userPage = userService.pageList(page, rows, user1);
-//
-//        List<UserVO> userVOList = new ArrayList<>();
-//        if (!userPage.getRecords().isEmpty()) {
-//            for (User user : userPage.getRecords()) {
-//                UserVO userVO = new UserVO();
-//                userVO.setUserId(user.getUserId());
-//                userVO.setUsername(user.getUsername());
-//                userVO.setEmail(user.getEmail());
-//                userVO.setPhone(user.getPhone());
-//                userVOList.add(userVO);
-//            }
-//        }
-//
-//        Page<UserVO> userVOPage = new Page<>(page, rows);
-//        userVOPage.setRecords(userVOList);
-//        userVOPage.setTotal(userPage.getTotal());
-//        userVOPage.setCurrent(userPage.getCurrent());
-//
-//        return R.success(userVOPage);
-//    }
-//
-//    /**
-//     * 通过userId查询用户信息
-//     * @param userId
-//     * @return
-//     */
-//    @ApiOperation("通过userId查询用户信息")
-//    @GetMapping("/user/info")
-//    public Result<UserVO> getUserInfo(@PathVariable Long userId) {
-//        log.info("通过userId查询用户信息");
-//
-//        User user = UserHolder.getUser();
-//
-//        if (user == null) {
-//            return Result.error(Status.CODE_500, "用户未登录");
-//        }
-//
-//        UserVO userVO = userService.getUserInfo(user, userId);
-//
-//        return Result.success(userVO);
-//    }
-
-//    /**
-//     * 修改用户信息
-//     * @param updateUser
-//     * @return
-//     */
-//    @ApiOperation("修改用户信息")
-//    @PutMapping("/updateUser")
-//    public R updateUser(@RequestBody User updateUser) {
-//        log.info("修改用户信息");
-//
-//        User user = UserHolder.getUser();
-//
-//        if (user == null) {
-//            return R.error(Status.CODE_500, "用户未登录");
-//        }
-//
-//        userService.updateUser(user, updateUser);
-//
-//        return R.success();
-//    }
-//
-//    /**
-//     * 重置密码
-//     * @param newPassword
-//     * @return
-//     */
-//    @ApiOperation("重置密码")
-//    @PostMapping("/reset-password")
-//    public R resetPassword(
-//            @RequestParam String newPassword) {
-//        log.info("重置密码");
-//
-//        User user = UserHolder.getUser();
-//
-//        if (user == null) {
-//            return R.error(Status.CODE_500, "用户未登录");
-//        }
-//
-//        userService.resetPassword(user, newPassword);
-//
-//        return R.success();
-//    }
 }

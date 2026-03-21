@@ -1,6 +1,6 @@
 package com.jins.aimentor.domain.dto;
 
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -19,13 +19,13 @@ public class LoginDto implements Serializable {
     /**
      * 用户名
      */
-    @NotNull(message = "用户名不能为空")
+    @NotBlank(message = "用户名不能为空")
     private String username;
 
     /**
      * 密码
      */
-    @NotNull(message = "密码不能为空")
+    @NotBlank(message = "密码不能为空")
     private String password;
 
 }

@@ -37,6 +37,7 @@ public class AcademicController {
     @GetMapping("/weakpoints/{studentId}")
     public Result<List<WeakPointVO>> getWeakPoints(@PathVariable Long studentId) {
         List<WeakPointVO> weakPoints = academicService.getWeakPoints(studentId);
+
         return Result.success(weakPoints);
     }
 }
