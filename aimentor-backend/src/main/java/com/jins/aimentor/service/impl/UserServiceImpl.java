@@ -39,7 +39,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Override
     @Transactional()
     public User register(RegistDto registForm) {
-        log.info("用户注册，用户名: {}", registForm.getUsername());
+        log.info("用户注册，用户信息: {}", registForm.toString());
 
         //查询用户
         LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
@@ -55,8 +55,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         user = new User();
         user.setUsername(registForm.getUsername());
         user.setPassword(registForm.getPassword());
+        user.setName(registForm.getName());
         user.setEmail(registForm.getEmail());
-        user.setPhone(registForm.getPhone());
+        //user.setPhone(registForm.getPhone());
         user.setRole(registForm.getRole());
         save(user);
 
@@ -71,27 +72,24 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      */
     @Override
     public String login(LoginDto loginForm) {
-        log.info("用户登录，用户名: {}", loginForm.getUsername());
+        log.info("用户登录，用户信息: {}", loginForm.toString());
 
-        //查询用户
+        // 查询用户（代码不变）...
         LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper
-                .eq(StringUtils.isNotBlank(loginForm.getUsername()), User::getUsername, loginForm.getUsername())
-                .eq(StringUtils.isNotBlank(loginForm.getPassword()), User::getPassword, loginForm.getPassword());
+        queryWrapper.eq(User::getUsername, loginForm.getUsername());
         User user = getOne(queryWrapper);
 
-        //用户不存在
         if (user == null) {
-            log.error("用户登录失败，用户名或密码错误，用户名: {}，密码：{}", loginForm.getUsername(), loginForm.getPassword());
+            log.error("用户登录失败，用户名或密码错误");
             throw new BizException(Status.CODE_403, "用户名或密码错误");
         }
 
-        //保存用户信息到ThreadLocal
+        // 保存用户信息到ThreadLocal
         UserHolder.saveUser(user);
 
-        //生成token
+        // 生成token
         String token = TokenUtils.genToken(user.getId().toString(), user.getUsername());
-        log.info("用户登录成功，生成token，{}", token);
+        log.info("用户登录成功，生成token: {}", token);
 
         //把用户存到redis中
         redisTemplate.opsForValue().set(RedisConstants.USER_TOKEN_KEY + token, user);

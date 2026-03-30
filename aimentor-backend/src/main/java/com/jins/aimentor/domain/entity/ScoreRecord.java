@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.util.Date;
 
 /**
  * 成绩记录实体类
@@ -69,14 +69,14 @@ public class ScoreRecord {
      * <p>插入时自动填充</p>
      */
     @TableField(fill = FieldFill.INSERT)
-    private LocalDateTime createTime;
+    private Date createTime;
 
     /**
      * 更新时间
      * <p>插入和更新时自动填充</p>
      */
     @TableField(fill = FieldFill.INSERT_UPDATE)
-    private LocalDateTime updateTime;
+    private Date updateTime;
 
     /**
      * 逻辑删除标志

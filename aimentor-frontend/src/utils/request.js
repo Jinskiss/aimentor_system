@@ -1,37 +1,114 @@
-import axios from 'axios'
+/**
+ * Axios 请求封装
+ * 统一处理请求拦截、响应拦截、错误处理
+ */
 
+import axios from 'axios'
+import { ElMessage } from 'element-plus'
+import { useUserStore } from '@/stores/user'
+
+// 创建axios实例
 const request = axios.create({
-  baseURL: '/api',
-  timeout: 10000
+  baseURL: '/api',  // 后端API基础地址
+  timeout: 10000,  // 请求超时时间
+  headers: {
+    'Content-Type': 'application/json'
+  }
 })
 
-// 请求拦截器（保持不变）
+// 请求拦截器
 request.interceptors.request.use(
-  config => {
+  (config) => {
+    // 从localStorage获取token（避免在拦截器中引入store导致循环依赖）
     const token = localStorage.getItem('token')
+    
+    // 如果有token，添加到请求头
     if (token) {
-      config.headers.Authorization = `Bearer ${token}`
+      config.headers['Authorization'] = 'Bearer ' + token
     }
+    
     return config
   },
-  error => Promise.reject(error)
+  (error) => {
+    console.error('请求错误:', error)
+    return Promise.reject(error)
+  }
 )
 
-// 响应拦截器：统一转换 code 为数字
+// 响应拦截器
 request.interceptors.response.use(
-  response => {
+  (response) => {
+    // 如果响应是blob类型（下载文件），直接返回
+    if (response.config.responseType === 'blob') {
+      return response
+    }
+    
     const res = response.data
-    // 如果存在 code 字段，将其转换为数字
-    if (res.code !== undefined) {
-      res.code = Number(res.code)
+    
+    // ===== 关键修复：判断响应是否存在 =====
+    if (!res) {
+      ElMessage.error('响应数据为空')
+      return Promise.reject(new Error('响应数据为空'))
     }
-    // 现在可以安全地使用 !== 进行严格比较
-    if (res.code !== 200) {
-      return Promise.reject(new Error(res.msg || 'Error'))
+    
+    // ===== 关键修复：兼容不同格式的成功判断 =====
+    // 有些后端返回 code: 200, 有些返回 code: "200"
+    const code = Number(res.code)
+    
+    // 如果code不是200，说明有错误
+    if (code !== 200) {
+      const msg = res.msg || res.message || '请求失败'
+      ElMessage.error(msg)
+      
+      // 401未授权，清除token并跳转到登录页
+      if (code === 401) {
+        localStorage.removeItem('token')
+        window.location.href = '/login'
+      }
+      
+      // 返回reject，让调用方catch
+      return Promise.reject(new Error(msg))
     }
+    
+    // ===== 关键修复：返回完整响应对象 =====
+    // 让调用方可以获取 res.code, res.msg, res.data
     return res
   },
-  error => Promise.reject(error)
+  (error) => {
+    console.error('响应错误:', error)
+    
+    // 处理网络错误
+    let msg = '网络错误，请稍后重试'
+    
+    if (error.response) {
+      // 服务器返回了错误状态码
+      const status = error.response.status
+      const data = error.response.data
+      
+      if (status === 401) {
+        msg = '登录已过期，请重新登录'
+        localStorage.removeItem('token')
+        window.location.href = '/login'
+      } else if (status === 403) {
+        msg = '没有权限访问'
+      } else if (status === 404) {
+        msg = '请求的资源不存在'
+      } else if (status === 500) {
+        msg = data?.msg || '服务器内部错误'
+      } else {
+        msg = data?.msg || `请求失败(${status})`
+      }
+    } else if (error.request) {
+      // 请求发出但没有收到响应
+      msg = '服务器无响应，请检查网络'
+    } else {
+      // 请求配置出错
+      msg = error.message
+    }
+    
+    ElMessage.error(msg)
+    return Promise.reject(error)
+  }
 )
 
 export default request

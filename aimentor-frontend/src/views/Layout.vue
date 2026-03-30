@@ -1,10 +1,21 @@
 <template>
-  <el-container class="layout">
-    <el-aside width="200px">
-      <el-menu :router="true" :default-active="$route.path" class="el-menu-vertical">
+  <el-container class="layout-container">
+    <!-- 侧边栏 -->
+    <el-aside width="200px" class="aside">
+      <div class="logo">
+        <h2>AI学情系统</h2>
+      </div>
+      <el-menu
+        :default-active="$route.path"
+        router
+        class="el-menu-vertical"
+        background-color="#304156"
+        text-color="#bfcbd9"
+        active-text-color="#409EFF"
+      >
         <el-menu-item index="/dashboard">
-          <el-icon><Odometer /></el-icon>
-          <span>仪表盘</span>
+          <el-icon><DataLine /></el-icon>
+          <span>学情分析</span>
         </el-menu-item>
         <el-menu-item index="/plan">
           <el-icon><Calendar /></el-icon>
@@ -12,7 +23,7 @@
         </el-menu-item>
         <el-menu-item index="/qa">
           <el-icon><ChatDotRound /></el-icon>
-          <span>智能问答</span>
+          <span>AI问答</span>
         </el-menu-item>
         <el-menu-item index="/resource">
           <el-icon><Collection /></el-icon>
@@ -20,14 +31,19 @@
         </el-menu-item>
       </el-menu>
     </el-aside>
+
+    <!-- 主内容区 -->
     <el-container>
-      <el-header>
-        <div class="header-content">
-          <span class="welcome">欢迎，{{ userStore.userInfo?.name || '同学' }}</span>
-          <el-button type="text" @click="handleLogout">退出登录</el-button>
+      <!-- 顶部导航 -->
+      <el-header class="header">
+        <div class="header-right">
+          <span class="username">欢迎，{{ userStore.username || '同学' }}</span>
+          <el-button type="danger" size="small" @click="handleLogout">退出登录</el-button>
         </div>
       </el-header>
-      <el-main>
+
+      <!-- 内容区 -->
+      <el-main class="main">
         <router-view />
       </el-main>
     </el-container>
@@ -35,47 +51,81 @@
 </template>
 
 <script setup>
-import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
-import { Odometer, Calendar, ChatDotRound, Collection } from '@element-plus/icons-vue'
+import { useRouter } from 'vue-router'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import { DataLine, Calendar, ChatDotRound, Collection } from '@element-plus/icons-vue'
 
-const router = useRouter()
 const userStore = useUserStore()
+const router = useRouter()
 
+// 获取用户信息
+if (userStore.isLoggedIn && !userStore.userInfo) {
+  userStore.fetchUserInfo()
+}
+
+// 退出登录
 const handleLogout = () => {
-  userStore.logout()
-  router.push('/login')
+  ElMessageBox.confirm('确定要退出登录吗？', '提示', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type: 'warning'
+  }).then(() => {
+    userStore.logout()
+    router.push('/login')
+    ElMessage.success('已退出登录')
+  })
 }
 </script>
 
 <style scoped>
-.layout {
+.layout-container {
   height: 100vh;
 }
-.el-aside {
+
+.aside {
   background-color: #304156;
 }
-.el-menu {
+
+.logo {
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  border-bottom: 1px solid #1f2d3d;
+}
+
+.logo h2 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.el-menu-vertical {
   border-right: none;
-  background-color: #304156;
 }
-.el-menu-item {
-  color: #bfcbd9;
-}
-.el-menu-item.is-active {
-  color: #409EFF;
-  background-color: #263445;
-}
-.el-header {
+
+.header {
   background-color: #fff;
-  border-bottom: 1px solid #e6e9f0;
+  box-shadow: 0 1px 4px rgba(0,21,41,.08);
   display: flex;
   align-items: center;
   justify-content: flex-end;
 }
-.header-content {
+
+.header-right {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 15px;
+}
+
+.username {
+  color: #606266;
+}
+
+.main {
+  background-color: #f0f2f5;
+  padding: 20px;
+  overflow-y: auto;
 }
 </style>

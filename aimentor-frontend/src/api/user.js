@@ -1,6 +1,10 @@
 import request from '@/utils/request'
 
-export function login(data) {
+/**
+ * 用户登录
+ * @param {Object} data {username, password}
+ */
+export const login = (data) => {
   return request({
     url: '/user/login',
     method: 'post',
@@ -8,7 +12,11 @@ export function login(data) {
   })
 }
 
-export function register(data) {
+/**
+ * 用户注册
+ * @param {Object} data {username, password, name, email, role}
+ */
+export const register = (data) => {
   return request({
     url: '/user/register',
     method: 'post',
@@ -16,7 +24,10 @@ export function register(data) {
   })
 }
 
-export function getUserInfo() {
+/**
+ * 获取用户信息
+ */
+export const getUserInfo = () => {
   return request({
     url: '/user/info',
     method: 'get'

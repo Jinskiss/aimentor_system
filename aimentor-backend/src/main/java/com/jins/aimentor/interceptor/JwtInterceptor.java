@@ -26,6 +26,7 @@ import java.util.concurrent.TimeUnit;
  */
 @Component
 public class JwtInterceptor implements HandlerInterceptor {
+
     @Autowired
     private RedisTemplate<String, User> redisTemplate;
 

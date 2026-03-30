@@ -45,10 +45,10 @@ public class RegistDto implements Serializable {
     @Email(message = "邮箱格式不正确")
     private String email;
 
-    /**
-     * 手机号
-     */
-    @NotBlank(message = "手机号不能为空")
-    private String phone;
+//    /**
+//     * 手机号
+//     */
+//    @NotBlank(message = "手机号不能为空")
+//    private String phone;
 
 }
