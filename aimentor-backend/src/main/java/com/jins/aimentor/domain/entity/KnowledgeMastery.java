@@ -40,6 +40,11 @@ public class KnowledgeMastery {
     private Integer mastery;
 
     /**
+     * 所属科目
+     */
+    private String subject;
+
+    /**
      * 创建时间
      * <p>插入时自动填充</p>
      */

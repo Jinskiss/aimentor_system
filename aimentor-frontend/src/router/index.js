@@ -29,6 +29,12 @@ const routes = [
         meta: { title: '学情分析' }
       },
       {
+        path: 'record-manage',
+        name: 'RecordManage',
+        component: () => import('@/views/RecordManage.vue'),
+        meta: { title: '记录管理' }
+      },
+      {
         path: 'plan',
         name: 'Plan',
         component: () => import('@/views/Plan.vue'),

@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.reflection.MetaObject;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
+import java.util.Date;
 
 @Slf4j
 @Component
@@ -15,9 +15,10 @@ public class MyMetaObjectHandler implements MetaObjectHandler {
     public void insertFill(MetaObject metaObject) {
         log.debug("插入填充...");
 
-        // 全部用 strictInsertFill，不能用 fillStrategy
-        this.strictInsertFill(metaObject, "createTime", LocalDateTime.class, LocalDateTime.now());
-        this.strictInsertFill(metaObject, "updateTime", LocalDateTime.class, LocalDateTime.now());
+        Date now = new Date();
+        // 实体字段为 java.util.Date，类型须一致，否则 strictInsertFill 不生效，INSERT 会写入 NULL
+        this.strictInsertFill(metaObject, "createTime", Date.class, now);
+        this.strictInsertFill(metaObject, "updateTime", Date.class, now);
         this.strictInsertFill(metaObject, "deleted", Integer.class, 0);
     }
 
@@ -25,7 +26,6 @@ public class MyMetaObjectHandler implements MetaObjectHandler {
     public void updateFill(MetaObject metaObject) {
         log.debug("更新填充...");
 
-        // 同样用 strictInsertFill
-        this.strictInsertFill(metaObject, "updateTime", LocalDateTime.class, LocalDateTime.now());
+        this.strictUpdateFill(metaObject, "updateTime", Date.class, new Date());
     }
 }

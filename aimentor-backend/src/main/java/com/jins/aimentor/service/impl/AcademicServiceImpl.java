@@ -1,6 +1,8 @@
 package com.jins.aimentor.service.impl;
 
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
+import com.jins.aimentor.domain.dto.KnowledgeMasteryDto;
+import com.jins.aimentor.domain.dto.ScoreRecordDto;
 import com.jins.aimentor.domain.entity.KnowledgeMastery;
 import com.jins.aimentor.domain.entity.ScoreRecord;
 import com.jins.aimentor.domain.vo.ScoreTrendVO;
@@ -110,7 +112,59 @@ public class AcademicServiceImpl implements AcademicService {
 
         weakPointVO.setKnowledge(mastery.getKnowledge());
         weakPointVO.setMastery(mastery.getMastery());
+        weakPointVO.setSubject(mastery.getSubject());
 
         return weakPointVO;
+    }
+
+    @Override
+    public boolean addScoreRecord(Long studentId, ScoreRecordDto dto) {
+        log.info("添加成绩记录，studentId: {}, dto: {}", studentId, dto);
+
+        ScoreRecord record = new ScoreRecord();
+        record.setStudentId(studentId);
+        record.setExamDate(dto.getExamDate());
+        record.setSubject(dto.getSubject());
+        record.setScore(dto.getScore());
+        record.setFullScore(dto.getFullScore());
+
+        int result = scoreRecordMapper.insert(record);
+        log.info("成绩记录添加结果: {}", result > 0 ? "成功" : "失败");
+        return result > 0;
+    }
+
+    @Override
+    public boolean addKnowledgeMastery(Long studentId, KnowledgeMasteryDto dto) {
+        log.info("添加知识点掌握度，studentId: {}, dto: {}", studentId, dto);
+
+        KnowledgeMastery mastery = new KnowledgeMastery();
+        mastery.setStudentId(studentId);
+        mastery.setKnowledge(dto.getKnowledge());
+        mastery.setMastery(dto.getMastery());
+        mastery.setSubject(dto.getSubject());
+
+        int result = knowledgeMasteryMapper.insert(mastery);
+        log.info("知识点掌握度添加结果: {}", result > 0 ? "成功" : "失败");
+        return result > 0;
+    }
+
+    @Override
+    public List<ScoreRecord> getScoreRecords(Long studentId) {
+        log.info("获取学生所有成绩记录，studentId: {}", studentId);
+        return scoreRecordMapper.selectList(
+            new com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<ScoreRecord>()
+                .eq(ScoreRecord::getStudentId, studentId)
+                .orderByDesc(ScoreRecord::getExamDate)
+        );
+    }
+
+    @Override
+    public List<KnowledgeMastery> getKnowledgeMasteries(Long studentId) {
+        log.info("获取学生所有知识点掌握度，studentId: {}", studentId);
+        return knowledgeMasteryMapper.selectList(
+            new com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<KnowledgeMastery>()
+                .eq(KnowledgeMastery::getStudentId, studentId)
+                .orderByAsc(KnowledgeMastery::getMastery)
+        );
     }
 }

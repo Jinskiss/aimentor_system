@@ -1,5 +1,7 @@
 package com.jins.aimentor.service;
 
+import com.jins.aimentor.domain.dto.KnowledgeMasteryDto;
+import com.jins.aimentor.domain.dto.ScoreRecordDto;
 import com.jins.aimentor.domain.vo.ScoreTrendVO;
 import com.jins.aimentor.domain.vo.WeakPointVO;
 
@@ -24,4 +26,38 @@ public interface AcademicService {
      * @return 薄弱知识点列表，按掌握度从低到高排序
      */
     List<WeakPointVO> getWeakPoints(Long studentId);
+
+    /**
+     * 添加成绩记录
+     *
+     * @param studentId 学生ID
+     * @param dto 成绩记录信息
+     * @return 是否添加成功
+     */
+    boolean addScoreRecord(Long studentId, ScoreRecordDto dto);
+
+    /**
+     * 添加知识点掌握度记录
+     *
+     * @param studentId 学生ID
+     * @param dto 知识点掌握度信息
+     * @return 是否添加成功
+     */
+    boolean addKnowledgeMastery(Long studentId, KnowledgeMasteryDto dto);
+
+    /**
+     * 获取学生的所有成绩记录
+     *
+     * @param studentId 学生ID
+     * @return 成绩记录列表
+     */
+    List<com.jins.aimentor.domain.entity.ScoreRecord> getScoreRecords(Long studentId);
+
+    /**
+     * 获取学生的所有知识点掌握度记录
+     *
+     * @param studentId 学生ID
+     * @return 知识点掌握度列表
+     */
+    List<com.jins.aimentor.domain.entity.KnowledgeMastery> getKnowledgeMasteries(Long studentId);
 }

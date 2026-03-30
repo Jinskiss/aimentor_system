@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <el-container class="layout-container">
     <!-- 侧边栏 -->
     <el-aside width="200px" class="aside">
@@ -15,7 +15,11 @@
       >
         <el-menu-item index="/dashboard">
           <el-icon><DataLine /></el-icon>
-          <span>学情分析</span>
+          <span>学情信息</span>
+        </el-menu-item>
+        <el-menu-item index="/record-manage">
+          <el-icon><Edit /></el-icon>
+          <span>学情记录</span>
         </el-menu-item>
         <el-menu-item index="/plan">
           <el-icon><Calendar /></el-icon>
@@ -54,7 +58,7 @@
 import { useUserStore } from '@/stores/user'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { DataLine, Calendar, ChatDotRound, Collection } from '@element-plus/icons-vue'
+import { DataLine, Calendar, ChatDotRound, Collection, Edit } from '@element-plus/icons-vue'
 
 const userStore = useUserStore()
 const router = useRouter()

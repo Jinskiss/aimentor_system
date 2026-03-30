@@ -3,6 +3,7 @@ package com.jins.aimentor.controller;
 import com.jins.aimentor.common.Result;
 import com.jins.aimentor.domain.dto.LoginDto;
 import com.jins.aimentor.domain.dto.RegistDto;
+import com.jins.aimentor.domain.dto.SendCodeDto;
 import com.jins.aimentor.domain.entity.User;
 import com.jins.aimentor.domain.vo.UserVO;
 import com.jins.aimentor.service.UserService;
@@ -44,6 +45,20 @@ public class UserController {
         }
 
         return Result.success(userService.register(registForm));
+    }
+
+    /**
+     * 发送验证码
+     * @param dto 包含手机号
+     * @return 验证码（模拟返回）
+     */
+    @ApiOperation("发送验证码")
+    @PostMapping("/sendCode")
+    public Result<String> sendCode(@RequestBody SendCodeDto dto) {
+        log.info("发送验证码，手机号: {}", dto.getPhone());
+
+        String code = userService.sendVerificationCode(dto.getPhone());
+        return Result.success(code);
     }
 
     /**

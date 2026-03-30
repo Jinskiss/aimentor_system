@@ -1,19 +1,21 @@
 package com.jins.aimentor.controller;
 
 import com.jins.aimentor.common.Result;
+import com.jins.aimentor.domain.dto.KnowledgeMasteryDto;
+import com.jins.aimentor.domain.dto.ScoreRecordDto;
+import com.jins.aimentor.domain.entity.KnowledgeMastery;
+import com.jins.aimentor.domain.entity.ScoreRecord;
 import com.jins.aimentor.domain.vo.ScoreTrendVO;
 import com.jins.aimentor.domain.vo.WeakPointVO;
 import com.jins.aimentor.service.AcademicService;
 import com.jins.aimentor.utils.UserHolder;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -96,5 +98,57 @@ public class AcademicController {
         List<WeakPointVO> weakPoints = academicService.getWeakPoints(studentId);
 
         return Result.success(weakPoints);
+    }
+
+    /**
+     * 添加成绩记录
+     */
+    @ApiOperation("添加成绩记录")
+    @PostMapping("/score")
+    public Result<Void> addScoreRecord(@Valid @RequestBody ScoreRecordDto dto) {
+        Long studentId = UserHolder.getUser().getId();
+        log.info("添加成绩记录，studentId: {}, dto: {}", studentId, dto);
+
+        boolean success = academicService.addScoreRecord(studentId, dto);
+        return success ? Result.success() : Result.error("添加成绩记录失败");
+    }
+
+    /**
+     * 添加知识点掌握度记录
+     */
+    @ApiOperation("添加知识点掌握度")
+    @PostMapping("/mastery")
+    public Result<Void> addKnowledgeMastery(@Valid @RequestBody KnowledgeMasteryDto dto) {
+        Long studentId = UserHolder.getUser().getId();
+        log.info("添加知识点掌握度，studentId: {}, dto: {}", studentId, dto);
+
+        boolean success = academicService.addKnowledgeMastery(studentId, dto);
+        return success ? Result.success() : Result.error("添加知识点掌握度失败");
+    }
+
+    /**
+     * 获取当前学生的所有成绩记录
+     */
+    @ApiOperation("获取当前学生所有成绩记录")
+    @GetMapping("/scores")
+    public Result<List<ScoreRecord>> getCurrentStudentScores() {
+        Long studentId = UserHolder.getUser().getId();
+        log.info("获取当前学生所有成绩记录，studentId: {}", studentId);
+
+        List<ScoreRecord> records = academicService.getScoreRecords(studentId);
+        return Result.success(records);
+    }
+
+    /**
+     * 获取当前学生的所有知识点掌握度记录
+     */
+    @ApiOperation("获取当前学生所有知识点掌握度")
+    @GetMapping("/masteries")
+    public Result<List<KnowledgeMastery>> getCurrentStudentMasteries() {
+        Long studentId = UserHolder.getUser().getId();
+        log.info("获取当前学生所有知识点掌握度，studentId: {}", studentId);
+
+        List<KnowledgeMastery> masteries = academicService.getKnowledgeMasteries(studentId);
+        return Result.success(masteries);
     }
 }

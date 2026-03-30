@@ -28,4 +28,19 @@ public interface UserService extends IService<User> {
      * @return
      */
     UserVO getUserInfoById(Long userId);
+
+    /**
+     * 发送验证码
+     * @param phone 手机号
+     * @return 验证码
+     */
+    String sendVerificationCode(String phone);
+
+    /**
+     * 验证验证码是否正确
+     * @param phone 手机号
+     * @param code 用户输入的验证码
+     * @return 是否验证通过
+     */
+    boolean verifyCode(String phone, String code);
 }

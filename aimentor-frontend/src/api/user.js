@@ -33,3 +33,15 @@ export const getUserInfo = () => {
     method: 'get'
   })
 }
+
+/**
+ * 发送验证码
+ * @param {string} phone 手机号
+ */
+export const sendCode = (phone) => {
+  return request({
+    url: '/user/sendCode',
+    method: 'post',
+    data: { phone }
+  })
+}
