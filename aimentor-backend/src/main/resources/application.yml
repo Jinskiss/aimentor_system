@@ -32,3 +32,11 @@ mybatis-plus:
     db-config:
       update-strategy: not_null
       id-type: auto
+
+# ===================== AI 问答服务配置 =====================
+# Python AI 微服务地址（默认本机 8000 端口）
+# 启动顺序：先启动 Python AI 服务，再启动 Spring Boot 后端
+ai:
+  service:
+    base-url: http://127.0.0.1:8000
+    timeout-seconds: 60
