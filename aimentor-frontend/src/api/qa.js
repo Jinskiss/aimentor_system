@@ -6,9 +6,16 @@
  *   - POST /api/qa/reset  { sessionId }            -> 清空对话历史
  *
  * sessionId 用于多轮对话上下文，Qa.vue 中固定使用 'default'。
+ *
+ * 注意：问答链路需经过 Java -> Python -> Ollama，本地模型首次推理常超过 10 秒。
+ * 全局 axios 默认 timeout 为 10s，会导致浏览器先取消请求（Network 显示 canceled），
+ * 而后端日志仍可能显示 200。此处为 ask 单独延长超时，与 aimentor-ai 默认 120s 对齐。
  */
 
 import request from '@/utils/request'
+
+/** 问答接口专用超时（毫秒），需大于典型大模型首 token / 生成时间 */
+const QA_ASK_TIMEOUT_MS = 120000
 
 /**
  * 发送问题给 AI，返回回答
@@ -22,7 +29,8 @@ export const askQuestion = (data) => {
   return request({
     url: '/qa/ask',
     method: 'post',
-    data
+    data,
+    timeout: QA_ASK_TIMEOUT_MS
   })
 }
 
