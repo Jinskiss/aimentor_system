@@ -14,8 +14,8 @@ import java.util.Date;
  *
  */
 @Data
-@TableName("study_plan")
-public class StudyPlan {
+@TableName("plan")
+public class Plan {
 
     /**
      * 计划ID

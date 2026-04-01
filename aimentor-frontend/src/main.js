@@ -12,6 +12,9 @@ import ElementPlus from 'element-plus'
 import 'element-plus/dist/index.css'
 import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 
+// 全局样式（借鉴参考项目设计风格）
+import './styles/index.css'
+
 const app = createApp(App)
 
 // 注册所有图标

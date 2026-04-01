@@ -3,7 +3,7 @@ package com.jins.aimentor.domain.vo;
 import lombok.Data;
 
 @Data
-public class StudyPlanVO {
+public class PlanVO {
 
     /**
      * 计划ID

@@ -7,6 +7,33 @@ import axios from 'axios'
 import { ElMessage } from 'element-plus'
 import { useUserStore } from '@/stores/user'
 
+/**
+ * 从异常响应体提取可读错误信息（项目统一 Result 与 Spring Boot 默认错误 JSON 均可）
+ */
+function resolveResponseErrorMessage(data) {
+  if (data == null) return null
+  if (typeof data === 'string') return data
+  if (typeof data !== 'object') return null
+
+  const fromMsg = data.msg ?? data.message
+  if (fromMsg != null && String(fromMsg).trim() !== '') {
+    return String(fromMsg)
+  }
+
+  if (Array.isArray(data.errors) && data.errors.length) {
+    const parts = data.errors
+      .map((e) => (e && (e.defaultMessage || e.message)) || '')
+      .filter(Boolean)
+    if (parts.length) return parts.join('；')
+  }
+
+  if (typeof data.error === 'string' && data.error.trim() !== '') {
+    if (data.error !== 'Internal Server Error') return data.error
+  }
+
+  return null
+}
+
 // 创建axios实例
 const request = axios.create({
   baseURL: '/api',  // 后端API基础地址
@@ -51,17 +78,16 @@ request.interceptors.response.use(
       return Promise.reject(new Error('响应数据为空'))
     }
     
-    // ===== 关键修复：兼容不同格式的成功判断 =====
-    // 有些后端返回 code: 200, 有些返回 code: "200"
-    const code = Number(res.code)
-    
+    // ===== 统一 code 为数字，方便业务代码直接用 === 200 =====
+    res.code = Number(res.code)
+
     // 如果code不是200，说明有错误
-    if (code !== 200) {
+    if (res.code !== 200) {
       const msg = res.msg || res.message || '请求失败'
       ElMessage.error(msg)
       
       // 401未授权，清除token并跳转到登录页
-      if (code === 401) {
+      if (res.code === 401) {
         localStorage.removeItem('token')
         window.location.href = '/login'
       }
@@ -94,9 +120,9 @@ request.interceptors.response.use(
       } else if (status === 404) {
         msg = '请求的资源不存在'
       } else if (status === 500) {
-        msg = data?.msg || '服务器内部错误'
+        msg = resolveResponseErrorMessage(data) || '服务器内部错误'
       } else {
-        msg = data?.msg || `请求失败(${status})`
+        msg = resolveResponseErrorMessage(data) || `请求失败(${status})`
       }
     } else if (error.request) {
       // 请求发出但没有收到响应
