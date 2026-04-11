@@ -114,8 +114,16 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public Result<Void> handleAny(Exception e) {
         log.error("[GlobalException] 未捕获异常", e);
+        // 不把技术细节暴露给前端，统一返回友好提示
         String msg = e.getMessage();
-        if (msg == null || msg.isBlank()) {
+        if (msg == null || msg.isBlank()
+                || msg.contains("SQL")
+                || msg.contains("Connection")
+                || msg.contains("DataSource")
+                || msg.contains("郑")
+                || msg.contains("table")
+                || msg.contains("Exception")
+                || msg.contains("Error")) {
             msg = "服务异常，请稍后重试";
         }
         return Result.error(Status.CODE_500, msg);

@@ -95,4 +95,18 @@ public class UserController {
 
         return Result.success(userVO);
     }
+
+    /**
+     * 更新个人资料
+     */
+    @ApiOperation("更新个人资料")
+    @PutMapping("/update")
+    public Result<Void> updateUserInfo(@RequestBody User user) {
+        User current = UserHolder.getUser();
+        if (current == null) {
+            return Result.error("用户未登录");
+        }
+        userService.updateUserInfo(current.getId(), user);
+        return Result.success(null);
+    }
 }

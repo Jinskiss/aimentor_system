@@ -8,7 +8,7 @@ import java.util.Date;
 /**
  * 用户实体类
  *
- * <p>对应数据库表：t_user</p>
+ * <p>对应数据库表：user（表名不带t_前缀）</p>
  * <p>使用MyBatis-Plus注解进行表映射和字段填充配置</p>
  *
  */
@@ -52,6 +52,46 @@ public class User {
      * 手机号码
      */
     private String phone;
+
+    /**
+     * 性别
+     */
+    private String gender;
+
+    /**
+     * 年级
+     */
+    private String grade;
+
+    /**
+     * 个人简介
+     */
+    private String bio;
+
+    /**
+     * 用户头像URL
+     */
+    private String avatar;
+
+    /**
+     * 累计学习天数
+     */
+    private Integer studyDays;
+
+    /**
+     * 累计学习分钟数
+     */
+    private Integer totalMinutes;
+
+    /**
+     * 用户等级
+     */
+    private Integer level;
+
+    /**
+     * 经验值
+     */
+    private Integer experience;
 
     /**
      * 创建时间

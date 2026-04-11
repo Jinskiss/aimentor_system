@@ -1,8 +1,11 @@
 package com.jins.aimentor.domain.vo;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import lombok.Data;
+
+import java.util.Date;
 
 /**
  * UserVO — 用户信息返回 VO（View Object）
@@ -25,7 +28,6 @@ public class UserVO {
 
     /**
      * 用户ID（Long → String 序列化，防止 JS number 精度丢失）
-     * 前端接收后为字符串，可安全用于后续业务逻辑，不再因精度问题导致查不到数据。
      */
     @JsonSerialize(using = ToStringSerializer.class)
     private Long id;
@@ -36,6 +38,11 @@ public class UserVO {
     private String username;
 
     /**
+     * 真实姓名
+     */
+    private String name;
+
+    /**
      * 电子邮箱
      */
     private String email;
@@ -44,4 +51,30 @@ public class UserVO {
      * 手机号码
      */
     private String phone;
+
+    /**
+     * 性别
+     */
+    private String gender;
+
+    /**
+     * 年级
+     */
+    private String grade;
+
+    /**
+     * 个人简介
+     */
+    private String bio;
+
+    /**
+     * 角色
+     */
+    private String role;
+
+    /**
+     * 创建时间
+     */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    private Date createTime;
 }

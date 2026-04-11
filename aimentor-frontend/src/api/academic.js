@@ -144,3 +144,33 @@ export const getWeakPoints = () => {
     method: 'get'
   })
 }
+
+// ==================== 教师查看指定学生学情 ====================
+
+export const getScoreTrendForStudent = (studentId) => {
+  return request({
+    url: `/academic/trend/${studentId}`,
+    method: 'get'
+  })
+}
+
+export const getWeakPointsForStudent = (studentId) => {
+  return request({
+    url: `/academic/weakpoints/${studentId}`,
+    method: 'get'
+  })
+}
+
+export const getScoreRecordsForStudent = (studentId) => {
+  return request({
+    url: `/academic/scores/${studentId}`,
+    method: 'get'
+  })
+}
+
+export const getKnowledgeMasteriesForStudent = (studentId) => {
+  return request({
+    url: `/academic/masteries/${studentId}`,
+    method: 'get'
+  })
+}

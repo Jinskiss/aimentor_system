@@ -20,37 +20,50 @@ const routes = [
   {
     path: '/',
     component: () => import('@/views/Layout.vue'),
-    redirect: '/dashboard',
+    redirect: getDefaultRoute,
     children: [
+      // ===== 学生路由 =====
       {
         path: 'dashboard',
         name: 'Dashboard',
         component: () => import('@/views/Dashboard.vue'),
-        meta: { title: '学情分析' }
+        meta: { title: '学情分析', roles: ['student'] }
       },
       {
         path: 'record-manage',
         name: 'RecordManage',
         component: () => import('@/views/RecordManage.vue'),
-        meta: { title: '记录管理' }
+        meta: { title: '学情记录', roles: ['student'] }
       },
       {
         path: 'plan',
         name: 'Plan',
         component: () => import('@/views/Plan.vue'),
-        meta: { title: '学习计划' }
+        meta: { title: '学习计划', roles: ['student'] }
       },
       {
         path: 'qa',
         name: 'Qa',
         component: () => import('@/views/Qa.vue'),
-        meta: { title: 'AI问答' }
+        meta: { title: 'AI问答', roles: ['student'] }
       },
       {
         path: 'resource',
         name: 'Resource',
         component: () => import('@/views/Resource.vue'),
         meta: { title: '资源推荐' }
+      },
+      {
+        path: 'resource/:id',
+        name: 'ResourceDetail',
+        component: () => import('@/views/ResourceDetail.vue'),
+        meta: { title: '资源详情' }
+      },
+      {
+        path: 'notes',
+        name: 'Notes',
+        component: () => import('@/views/Notes.vue'),
+        meta: { title: '学习笔记', roles: ['student'] }
       },
       {
         path: 'profile',
@@ -63,10 +76,39 @@ const routes = [
         name: 'Settings',
         component: () => import('@/views/Settings.vue'),
         meta: { title: '设置' }
+      },
+      // ===== 教师路由 =====
+      {
+        path: 'teacher/dashboard',
+        name: 'TeacherDashboard',
+        component: () => import('@/views/TeacherDashboard.vue'),
+        meta: { title: '教师首页', roles: ['teacher'] }
+      },
+      {
+        path: 'teacher/students',
+        name: 'TeacherStudents',
+        component: () => import('@/views/TeacherStudents.vue'),
+        meta: { title: '学生学情', roles: ['teacher'] }
+      },
+      {
+        path: 'teacher/student/:id',
+        name: 'TeacherStudentDetail',
+        component: () => import('@/views/TeacherStudentDetail.vue'),
+        meta: { title: '学生学情详情', roles: ['teacher'] }
       }
     ]
   }
 ]
+
+/**
+ * 根据用户角色获取默认跳转路由
+ */
+function getDefaultRoute() {
+  const role = localStorage.getItem('userRole')
+  if (role === 'teacher') return '/teacher/dashboard'
+  if (role === 'admin') return '/admin/dashboard'
+  return '/dashboard'
+}
 
 const router = createRouter({
   history: createWebHistory(),
@@ -76,31 +118,42 @@ const router = createRouter({
 // 路由守卫
 router.beforeEach((to, from, next) => {
   console.log('路由守卫:', to.path, 'from:', from.path)
-  
+
   const token = localStorage.getItem('token')
+  const userRole = localStorage.getItem('userRole')
   const isLoggedIn = !!token
-  
-  console.log('是否已登录:', isLoggedIn)
-  
+
   // 访问公开页面（登录/注册）
   if (to.meta.public) {
-    // 已登录用户访问登录页，跳转到首页
     if (isLoggedIn && to.path === '/login') {
-      console.log('已登录，跳转到/dashboard')
-      next('/dashboard')
+      next('/')
       return
     }
     next()
     return
   }
-  
+
   // 访问需要登录的页面
   if (!isLoggedIn) {
-    console.log('未登录，跳转到/login')
     next('/login')
     return
   }
-  
+
+  // 角色权限校验：检查 meta.roles 是否限制了访问角色
+  if (to.meta.roles && to.meta.roles.length > 0) {
+    if (!to.meta.roles.includes(userRole)) {
+      // 角色不匹配，跳转到自己的首页
+      if (userRole === 'teacher') {
+        next('/teacher/dashboard')
+      } else if (userRole === 'admin') {
+        next('/admin/dashboard')
+      } else {
+        next('/dashboard')
+      }
+      return
+    }
+  }
+
   next()
 })
 

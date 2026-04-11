@@ -1,13 +1,16 @@
 package com.jins.aimentor.controller;
 
 import com.jins.aimentor.common.Result;
+import com.jins.aimentor.constants.Status;
 import com.jins.aimentor.domain.dto.KnowledgeMasteryDto;
 import com.jins.aimentor.domain.dto.ScoreRecordDto;
 import com.jins.aimentor.domain.entity.KnowledgeMastery;
 import com.jins.aimentor.domain.entity.ScoreRecord;
+import com.jins.aimentor.domain.entity.User;
 import com.jins.aimentor.domain.vo.ScoreTrendVO;
 import com.jins.aimentor.domain.vo.WeakPointVO;
 import com.jins.aimentor.service.AcademicService;
+import com.jins.aimentor.service.TeacherService;
 import com.jins.aimentor.utils.UserHolder;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -58,6 +61,27 @@ public class AcademicController {
     @Autowired
     private AcademicService academicService;
 
+    @Autowired
+    private TeacherService teacherService;
+
+    /**
+     * 学生仅可读本人；教师可读管辖年级学生；管理员可读全部
+     */
+    private boolean canReadStudentAcademic(Long studentId) {
+        User u = UserHolder.getUser();
+        if (u == null || studentId == null) {
+            return false;
+        }
+        String role = u.getRole();
+        if ("student".equals(role)) {
+            return studentId.equals(u.getId());
+        }
+        if ("teacher".equals(role)) {
+            return teacherService.canViewStudent(u.getId(), studentId);
+        }
+        return "admin".equals(role);
+    }
+
     // ==================== 成绩趋势查询 ====================
 
     /**
@@ -88,6 +112,9 @@ public class AcademicController {
     @GetMapping("/trend/{studentId}")
     public Result<List<ScoreTrendVO>> getScoreTrend(@PathVariable Long studentId) {
         log.info("[AcademicController] 获取指定学生成绩趋势，studentId={}", studentId);
+        if (!canReadStudentAcademic(studentId)) {
+            return Result.error(Status.CODE_403, "无权限查看该学生数据");
+        }
         List<ScoreTrendVO> trend = academicService.getScoreTrend(studentId);
         return Result.success(trend);
     }
@@ -119,6 +146,9 @@ public class AcademicController {
     @GetMapping("/weakpoints/{studentId}")
     public Result<List<WeakPointVO>> getWeakPoints(@PathVariable Long studentId) {
         log.info("[AcademicController] 获取指定学生薄弱知识点，studentId={}", studentId);
+        if (!canReadStudentAcademic(studentId)) {
+            return Result.error(Status.CODE_403, "无权限查看该学生数据");
+        }
         return Result.success(academicService.getWeakPoints(studentId));
     }
 
@@ -187,6 +217,19 @@ public class AcademicController {
         return Result.success(records);
     }
 
+    /**
+     * 获取指定学生的所有成绩记录（教师/管理员查看学生学情）
+     */
+    @ApiOperation("获取指定学生所有成绩记录（教师用）")
+    @GetMapping("/scores/{studentId}")
+    public Result<List<ScoreRecord>> getScoresByStudentId(@PathVariable Long studentId) {
+        if (!canReadStudentAcademic(studentId)) {
+            return Result.error(Status.CODE_403, "无权限查看该学生数据");
+        }
+        log.info("[AcademicController] 获取指定学生成绩记录，studentId={}", studentId);
+        return Result.success(academicService.getScoreRecords(studentId));
+    }
+
     // ==================== 知识点掌握度 CRUD ====================
 
     /**
@@ -246,5 +289,18 @@ public class AcademicController {
         List<KnowledgeMastery> masteries = academicService.getKnowledgeMasteries(studentId);
         log.info("[AcademicController] 返回 {} 条知识点记录", masteries.size());
         return Result.success(masteries);
+    }
+
+    /**
+     * 获取指定学生的所有知识点掌握度（教师/管理员查看学生学情）
+     */
+    @ApiOperation("获取指定学生所有知识点掌握度（教师用）")
+    @GetMapping("/masteries/{studentId}")
+    public Result<List<KnowledgeMastery>> getMasteriesByStudentId(@PathVariable Long studentId) {
+        if (!canReadStudentAcademic(studentId)) {
+            return Result.error(Status.CODE_403, "无权限查看该学生数据");
+        }
+        log.info("[AcademicController] 获取指定学生知识点掌握度，studentId={}", studentId);
+        return Result.success(academicService.getKnowledgeMasteries(studentId));
     }
 }

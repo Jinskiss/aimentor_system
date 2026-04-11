@@ -31,6 +31,18 @@ function resolveResponseErrorMessage(data) {
     if (data.error !== 'Internal Server Error') return data.error
   }
 
+  // 兜底：过滤掉常见技术错误关键词，不展示给用户
+  const raw = data.msg ?? data.message ?? ''
+  const skipPatterns = [
+    'SQLException', 'SQLState', 'Connection', 'DataSource',
+    '郑', 'table', 'database', 'Column', 'Row',
+    'NullPointer', 'ClassCast', 'JSON', 'parse', 'deserialize',
+    'timeout', 'refused', 'unavailable'
+  ]
+  if (skipPatterns.some(p => raw.includes(p))) {
+    return null  // 让外层走通用提示
+  }
+
   return null
 }
 

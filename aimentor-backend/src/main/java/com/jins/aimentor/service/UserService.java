@@ -30,6 +30,13 @@ public interface UserService extends IService<User> {
     UserVO getUserInfoById(Long userId);
 
     /**
+     * 更新用户信息（姓名/邮箱/手机/性别/年级/简介）
+     * @param userId 用户ID
+     * @param user 更新字段
+     */
+    void updateUserInfo(Long userId, User user);
+
+    /**
      * 发送验证码
      * @param phone 手机号
      * @return 验证码

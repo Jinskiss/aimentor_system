@@ -6,42 +6,35 @@ import lombok.Data;
 import java.util.Date;
 
 /**
- * 学习资源实体类
+ * 学习笔记实体类
  *
- * <p>对应数据库表：resource（表名不带t_前缀）</p>
- * <p>存储推荐的学习资源（视频、文档等）</p>
- *
+ * <p>对应数据库表：note</p>
+ * <p>存储用户创建的学习笔记，支持按科目归档和标签分类</p>
  */
 @Data
-@TableName("resource")
-public class Resource {
+@TableName("note")
+public class Note {
 
     /**
-     * 资源ID
+     * 笔记ID
      */
     @TableId(type = IdType.AUTO)
     private Long id;
 
     /**
-     * 资源标题
+     * 所属用户ID
+     */
+    private Long userId;
+
+    /**
+     * 笔记标题
      */
     private String title;
 
     /**
-     * 资源描述
+     * 笔记内容（支持 Markdown 富文本）
      */
-    private String description;
-
-    /**
-     * 资源类型
-     * <p>视频、文档、练习、音频等</p>
-     */
-    private String type;
-
-    /**
-     * 资源链接
-     */
-    private String url;
+    private String content;
 
     /**
      * 所属科目
@@ -49,21 +42,18 @@ public class Resource {
     private String subject;
 
     /**
-     * 推荐分数
-     * <p>用于排序，分数越高越优先推荐</p>
+     * 标签列表（多个标签用逗号分隔）
      */
-    private Integer recommendScore;
+    private String tags;
 
     /**
      * 创建时间
-     * <p>插入时自动填充</p>
      */
     @TableField(fill = FieldFill.INSERT)
     private Date createTime;
 
     /**
      * 更新时间
-     * <p>插入和更新时自动填充</p>
      */
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private Date updateTime;

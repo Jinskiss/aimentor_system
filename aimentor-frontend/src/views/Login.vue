@@ -72,10 +72,12 @@ const handleLogin = async () => {
     // 确保登录成功后再跳转
     if (result && userStore.isLoggedIn) {
       ElMessage.success('登录成功')
-      console.log('准备跳转到 /dashboard')
-      
-      // 使用 replace 避免回退到登录页
-      await router.replace('/dashboard')
+
+      // 根据角色跳转到对应首页
+      const role = userStore.userInfo?.role || 'student'
+      const targetPath = role === 'teacher' ? '/teacher/dashboard' : role === 'admin' ? '/admin/dashboard' : '/dashboard'
+      console.log('准备跳转到', targetPath)
+      await router.replace(targetPath)
       console.log('跳转完成')
     } else {
       throw new Error('登录状态异常')

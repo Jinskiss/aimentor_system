@@ -63,25 +63,111 @@
       </el-col>
     </el-row>
 
-    <!-- ================== 计划列表 ================== -->
-    <el-card class="plan-card">
-      <template #header>
-        <div class="card-header">
-          <div class="card-title">
-            <el-icon class="card-icon"><List /></el-icon>
-            <span>我的计划</span>
-          </div>
+    <!-- ================== 视图切换与筛选 ================== -->
+    <el-card class="control-card">
+      <div class="control-row">
+        <div class="control-left">
           <el-select
             v-model="filterStatus"
-            placeholder="筛选状态"
-            size="small"
-            style="width: 120px;"
+            placeholder="状态筛选"
+            size="default"
+            style="width: 140px;"
             clearable
           >
             <el-option label="全部" value="" />
             <el-option label="进行中" value="未完成" />
             <el-option label="已完成" value="已完成" />
           </el-select>
+          <el-select
+            v-model="filterSubject"
+            placeholder="科目筛选"
+            size="default"
+            style="width: 140px; margin-left: 10px;"
+            clearable
+          >
+            <el-option label="全部科目" value="" />
+            <el-option label="数学" value="数学" />
+            <el-option label="语文" value="语文" />
+            <el-option label="英语" value="英语" />
+            <el-option label="物理" value="物理" />
+            <el-option label="化学" value="化学" />
+          </el-select>
+        </div>
+        <div class="control-right">
+          <el-radio-group v-model="viewMode" size="small">
+            <el-radio-button label="list">
+              <el-icon><List /></el-icon> 列表
+            </el-radio-button>
+            <el-radio-button label="calendar">
+              <el-icon><Calendar /></el-icon> 日历
+            </el-radio-button>
+          </el-radio-group>
+        </div>
+      </div>
+    </el-card>
+
+    <!-- ================== 日历视图（甘特图） ================== -->
+    <el-card v-if="viewMode === 'calendar'" class="calendar-card">
+      <template #header>
+        <div class="card-header">
+          <div class="card-title">
+            <el-icon class="card-icon orange"><Calendar /></el-icon>
+            <span>计划进度</span>
+          </div>
+          <div class="calendar-nav">
+            <el-button text size="small" @click="prevWeek">
+              <el-icon><ArrowLeft /></el-icon>
+            </el-button>
+            <span class="calendar-period">{{ calendarPeriodLabel }}</span>
+            <el-button text size="small" @click="nextWeek">
+              <el-icon><ArrowRight /></el-icon>
+            </el-button>
+          </div>
+        </div>
+      </template>
+
+      <div class="gantt-container" ref="ganttRef">
+        <div class="gantt-header">
+          <div class="gantt-label">计划</div>
+          <div class="gantt-days">
+            <div v-for="day in weekDays" :key="day.date" :class="['gantt-day', { today: day.isToday }]">
+              <span class="day-name">{{ day.dayName }}</span>
+              <span class="day-date">{{ day.dateNum }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="gantt-body">
+          <div v-if="filteredPlans.length === 0" class="gantt-empty">
+            暂无学习计划
+          </div>
+          <div v-else v-for="plan in filteredPlans" :key="plan.id" class="gantt-row">
+            <div class="gantt-label">
+              <el-tag size="small" type="info">{{ plan.subject }}</el-tag>
+              <span class="plan-name">{{ plan.content.substring(0, 15) }}...</span>
+            </div>
+            <div class="gantt-days">
+              <div v-for="day in weekDays" :key="day.date" :class="['gantt-day', { today: day.isToday }]">
+                <div
+                  v-if="isPlanInRange(plan, day.date)"
+                  :class="['gantt-bar', plan.status === '已完成' ? 'completed' : 'in-progress']"
+                  :style="{ width: '100%', height: '24px', borderRadius: '4px' }"
+                ></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </el-card>
+
+    <!-- ================== 列表视图 ================== -->
+    <el-card v-else class="plan-card">
+      <template #header>
+        <div class="card-header">
+          <div class="card-title">
+            <el-icon class="card-icon blue"><List /></el-icon>
+            <span>我的计划</span>
+          </div>
         </div>
       </template>
 
@@ -115,6 +201,20 @@
 
           <div class="plan-content">
             <pre class="plan-text">{{ plan.content }}</pre>
+          </div>
+
+          <!-- 进度条 -->
+          <div class="plan-progress">
+            <div class="progress-label">
+              <span>完成进度</span>
+              <span>{{ plan.progress || 0 }}%</span>
+            </div>
+            <el-progress
+              :percentage="plan.progress || 0"
+              :color="plan.progress >= 100 ? '#67C23A' : '#409EFF'"
+              :stroke-width="8"
+              :show-text="false"
+            />
           </div>
 
           <div class="plan-footer">
@@ -231,6 +331,17 @@
             {{ currentPlan.startDate }} 至 {{ currentPlan.endDate }}
           </span>
         </div>
+        <div class="detail-progress">
+          <div class="progress-label">
+            <span>完成进度</span>
+            <span>{{ currentPlan.progress || 0 }}%</span>
+          </div>
+          <el-progress
+            :percentage="currentPlan.progress || 0"
+            :color="currentPlan.progress >= 100 ? '#67C23A' : '#409EFF'"
+            :stroke-width="12"
+          />
+        </div>
         <div class="detail-content">
           <pre>{{ currentPlan.content }}</pre>
         </div>
@@ -254,18 +365,9 @@
 import { ref, computed, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
-  Plus,
-  Document,
-  SuccessFilled,
-  Clock,
-  Calendar,
-  List,
-  Loading,
-  DocumentDelete,
-  CircleCheck,
-  View,
-  Delete,
-  MagicStick
+  Plus, Document, SuccessFilled, Clock, Calendar, List, Loading,
+  DocumentDelete, CircleCheck, View, Delete, MagicStick,
+  ArrowLeft, ArrowRight
 } from '@element-plus/icons-vue'
 import {
   getMyPlans,
@@ -289,7 +391,72 @@ const dialogVisible = ref(false)
 const detailVisible = ref(false)
 const currentPlan = ref(null)
 const filterStatus = ref('')
+const filterSubject = ref('')
+const viewMode = ref('list')
 const formRef = ref(null)
+const ganttRef = ref(null)
+
+// 日历视图相关
+const currentWeekStart = ref(getWeekStart(new Date()))
+
+function getWeekStart(date) {
+  const d = new Date(date)
+  const day = d.getDay()
+  const diff = d.getDate() - day + (day === 0 ? -6 : 1)
+  return new Date(d.setDate(diff))
+}
+
+function formatDate(date) {
+  const y = date.getFullYear()
+  const m = String(date.getMonth() + 1).padStart(2, '0')
+  const d = String(date.getDate()).padStart(2, '0')
+  return `${y}-${m}-${d}`
+}
+
+function addDays(date, days) {
+  const result = new Date(date)
+  result.setDate(result.getDate() + days)
+  return result
+}
+
+const weekDays = computed(() => {
+  const days = []
+  const dayNames = ['周一', '周二', '周三', '周四', '周五', '周六', '周日']
+  const today = formatDate(new Date())
+
+  for (let i = 0; i < 7; i++) {
+    const d = addDays(currentWeekStart.value, i)
+    const dateStr = formatDate(d)
+    days.push({
+      date: dateStr,
+      dayName: dayNames[i],
+      dateNum: d.getDate(),
+      isToday: dateStr === today
+    })
+  }
+  return days
+})
+
+const calendarPeriodLabel = computed(() => {
+  const start = currentWeekStart.value
+  const end = addDays(start, 6)
+  const startStr = `${start.getMonth() + 1}/${start.getDate()}`
+  const endStr = `${end.getMonth() + 1}/${end.getDate()}`
+  return `${startStr} - ${endStr}`
+})
+
+const prevWeek = () => {
+  currentWeekStart.value = addDays(currentWeekStart.value, -7)
+}
+
+const nextWeek = () => {
+  currentWeekStart.value = addDays(currentWeekStart.value, 7)
+}
+
+const isPlanInRange = (plan, date) => {
+  if (!plan.startDate || !plan.endDate) return false
+  return date >= plan.startDate && date <= plan.endDate
+}
 
 // 表单
 const form = ref({
@@ -315,8 +482,14 @@ const uniqueSubjects = computed(() => new Set(plans.value.map(p => p.subject)).s
 
 // 筛选后的计划
 const filteredPlans = computed(() => {
-  if (!filterStatus.value) return plans.value
-  return plans.value.filter(p => p.status === filterStatus.value)
+  let result = plans.value
+  if (filterStatus.value) {
+    result = result.filter(p => p.status === filterStatus.value)
+  }
+  if (filterSubject.value) {
+    result = result.filter(p => p.subject === filterSubject.value)
+  }
+  return result
 })
 
 // 加载计划列表
@@ -328,7 +501,6 @@ const loadPlans = async () => {
       plans.value = res.data || []
     }
   } catch {
-    // 已在 request 拦截器中提示具体错误
   } finally {
     loading.value = false
   }
@@ -372,7 +544,6 @@ const handleGenerate = async () => {
       ElMessage.error(res.msg || '生成失败')
     }
   } catch {
-    // 已在 request 拦截器中提示具体错误（含业务 code≠200、HTTP 错误体 message）
   } finally {
     submitting.value = false
   }
@@ -399,7 +570,6 @@ const handleComplete = async (id) => {
       ElMessage.error(res.msg || '操作失败')
     }
   } catch {
-    // 已在 request 拦截器中提示
   }
 }
 
@@ -438,7 +608,6 @@ const handleDelete = async (id) => {
       ElMessage.error(res.msg || '删除失败')
     }
   } catch {
-    // 已在 request 拦截器中提示
   }
 }
 
@@ -540,17 +709,39 @@ onMounted(() => {
   margin-top: 2px;
 }
 
-/* 计划卡片 */
-.plan-card {
-  border-radius: 16px;
-  overflow: hidden;
+/* 控制卡片 */
+.control-card {
+  margin-bottom: 16px;
+  border-radius: 12px;
+}
+
+.control-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.control-left {
+  display: flex;
+  align-items: center;
+}
+
+.control-right {
+  display: flex;
+  align-items: center;
+}
+
+/* 日历卡片 */
+.calendar-card {
+  margin-bottom: 16px;
+  border-radius: 12px;
 }
 
 .card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 20px;
+  padding: 12px 16px;
 }
 
 .card-title {
@@ -563,8 +754,126 @@ onMounted(() => {
 }
 
 .card-icon {
-  color: #409EFF;
   font-size: 20px;
+}
+
+.card-icon.blue { color: #409EFF; }
+.card-icon.orange { color: #909CF0; }
+
+.calendar-nav {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.calendar-period {
+  font-size: 14px;
+  color: #606266;
+  font-weight: 500;
+  min-width: 120px;
+  text-align: center;
+}
+
+/* 甘特图 */
+.gantt-container {
+  padding: 16px;
+}
+
+.gantt-header {
+  display: flex;
+  border-bottom: 2px solid #e4e7ed;
+  padding-bottom: 12px;
+  margin-bottom: 8px;
+}
+
+.gantt-label {
+  width: 180px;
+  flex-shrink: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: #606266;
+  padding-right: 12px;
+}
+
+.gantt-days {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.gantt-day {
+  text-align: center;
+  padding: 4px;
+  border-radius: 4px;
+}
+
+.gantt-day.today {
+  background: rgba(64, 158, 255, 0.1);
+}
+
+.day-name {
+  display: block;
+  font-size: 12px;
+  color: #909399;
+}
+
+.day-date {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: #303133;
+}
+
+.gantt-body {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.gantt-empty {
+  text-align: center;
+  padding: 40px;
+  color: #909399;
+}
+
+.gantt-row {
+  display: flex;
+  padding: 8px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.gantt-row:last-child {
+  border-bottom: none;
+}
+
+.gantt-bar {
+  transition: all 0.3s;
+}
+
+.gantt-bar.in-progress {
+  background: linear-gradient(135deg, #409EFF, #66b1ff);
+}
+
+.gantt-bar.completed {
+  background: linear-gradient(135deg, #67C23A, #85ce61);
+}
+
+.plan-name {
+  font-size: 12px;
+  color: #909399;
+  margin-top: 4px;
+  display: block;
+}
+
+/* 计划卡片 */
+.plan-card {
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.plan-card :deep(.el-card__header) {
+  padding: 0;
+  border-bottom: none;
 }
 
 /* 加载和空状态 */
@@ -642,6 +951,22 @@ onMounted(() => {
   margin: 0;
 }
 
+/* 进度条 */
+.plan-progress {
+  margin-bottom: 12px;
+  padding: 12px;
+  background: #fff;
+  border-radius: 8px;
+}
+
+.progress-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #606266;
+  margin-bottom: 8px;
+}
+
 .plan-footer {
   display: flex;
   justify-content: space-between;
@@ -687,6 +1012,17 @@ onMounted(() => {
   color: #909399;
 }
 
+.detail-progress {
+  margin-bottom: 16px;
+  padding: 12px;
+  background: #f5f7fa;
+  border-radius: 8px;
+}
+
+.detail-progress .progress-label {
+  margin-bottom: 8px;
+}
+
 .detail-content {
   background: #f5f7fa;
   border-radius: 8px;
@@ -701,11 +1037,5 @@ onMounted(() => {
   white-space: pre-wrap;
   word-break: break-word;
   margin: 0;
-}
-
-/* 深度选择器 */
-:deep(.el-card__header) {
-  padding: 0;
-  border-bottom: none;
 }
 </style>

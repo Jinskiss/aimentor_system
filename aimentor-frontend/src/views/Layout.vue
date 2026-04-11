@@ -18,7 +18,7 @@
 
       <!-- 导航菜单 -->
       <el-menu
-        :default-active="$route.path"
+        :default-active="menuActivePath"
         router
         class="el-menu-vertical"
         :collapse="isCollapse"
@@ -27,26 +27,55 @@
         text-color="#a0a0b0"
         active-text-color="#ff6633"
       >
-        <el-menu-item index="/dashboard">
-          <el-icon><DataLine /></el-icon>
-          <template #title>学情信息</template>
-        </el-menu-item>
-        <el-menu-item index="/record-manage">
-          <el-icon><Edit /></el-icon>
-          <template #title>学情记录</template>
-        </el-menu-item>
-        <el-menu-item index="/plan">
-          <el-icon><Calendar /></el-icon>
-          <template #title>学习计划</template>
-        </el-menu-item>
-        <el-menu-item index="/qa">
-          <el-icon><ChatDotRound /></el-icon>
-          <template #title>AI问答</template>
-        </el-menu-item>
-        <el-menu-item index="/resource">
-          <el-icon><Collection /></el-icon>
-          <template #title>资源推荐</template>
-        </el-menu-item>
+        <!-- ===== 学生菜单 ===== -->
+        <template v-if="currentRole === 'student'">
+          <el-menu-item index="/dashboard">
+            <el-icon><DataLine /></el-icon>
+            <template #title>学情分析</template>
+          </el-menu-item>
+          <el-menu-item index="/record-manage">
+            <el-icon><Edit /></el-icon>
+            <template #title>学情记录</template>
+          </el-menu-item>
+          <el-menu-item index="/plan">
+            <el-icon><Calendar /></el-icon>
+            <template #title>学习计划</template>
+          </el-menu-item>
+          <el-menu-item index="/qa">
+            <el-icon><ChatDotRound /></el-icon>
+            <template #title>AI问答</template>
+          </el-menu-item>
+          <el-menu-item index="/resource">
+            <el-icon><Collection /></el-icon>
+            <template #title>资源推荐</template>
+          </el-menu-item>
+          <el-menu-item index="/notes">
+            <el-icon><Notebook /></el-icon>
+            <template #title>学习笔记</template>
+          </el-menu-item>
+        </template>
+
+        <!-- ===== 教师菜单 ===== -->
+        <template v-else-if="currentRole === 'teacher'">
+          <el-menu-item index="/teacher/dashboard">
+            <el-icon><DataLine /></el-icon>
+            <template #title>教师首页</template>
+          </el-menu-item>
+          <el-menu-item index="/teacher/students">
+            <el-icon><User /></el-icon>
+            <template #title>学生学情</template>
+          </el-menu-item>
+        </template>
+
+        <!-- ===== 管理员菜单（占位，后续开发）===== -->
+        <template v-else-if="currentRole === 'admin'">
+          <el-menu-item index="/admin/dashboard">
+            <el-icon><DataLine /></el-icon>
+            <template #title>管理首页</template>
+          </el-menu-item>
+        </template>
+
+        <!-- ===== 通用菜单 ===== -->
         <el-menu-item index="/profile">
           <el-icon><User /></el-icon>
           <template #title>个人中心</template>
@@ -79,7 +108,7 @@
         </div>
         <div class="header-right">
           <!-- 消息通知 -->
-          <el-dropdown trigger="click" @command="handleNotifCommand" placement="bottom-end">
+          <el-dropdown trigger="click" placement="bottom-end">
             <div class="header-action">
               <el-badge :value="unreadCount" :hidden="unreadCount === 0" :max="99" class="badge-item">
                 <el-icon :size="20"><Bell /></el-icon>
@@ -162,13 +191,6 @@ import { useUserStore } from '@/stores/user'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
-  DataLine,
-  Calendar,
-  ChatDotRound,
-  Collection,
-  Edit,
-  DArrowLeft,
-  DArrowRight,
   Bell,
   ArrowDown,
   User,
@@ -177,7 +199,13 @@ import {
   CircleCheck,
   ChatDotRound,
   Calendar,
-  WarningFilled
+  WarningFilled,
+  DataLine,
+  Collection,
+  Notebook,
+  Edit,
+  DArrowLeft,
+  DArrowRight,
 } from '@element-plus/icons-vue'
 
 const userStore = useUserStore()
@@ -193,7 +221,6 @@ const notifications = ref([
 ])
 const unreadCount = computed(() => notifications.value.filter(n => !n.read).length)
 
-const handleNotifCommand = () => {}
 const markAllRead = () => { notifications.value.forEach(n => n.read = true) }
 const handleNotifClick = (item) => {
   item.read = true
@@ -206,13 +233,33 @@ const userRole = computed(() => {
   return roleMap[role] || '学生'
 })
 
+const currentRole = computed(() => {
+  return userStore.userInfo?.role || 'student'
+})
+
+const menuActivePath = computed(() => {
+  const p = route.path
+  if (p.startsWith('/resource/')) return '/resource'
+  if (p.startsWith('/teacher/student/')) return '/teacher/students'
+  if (p.startsWith('/teacher/students')) return '/teacher/students'
+  if (p.startsWith('/teacher/')) return '/teacher/dashboard'
+  if (p.startsWith('/admin/')) return '/admin/dashboard'
+  return p
+})
+
 const currentPageName = computed(() => {
+  if (route.name === 'ResourceDetail') return '资源详情'
+  if (route.path === '/teacher/dashboard') return '教师首页'
+  if (route.path === '/teacher/students') return '学生学情'
+  if (route.name === 'TeacherStudentDetail') return '学生学情详情'
+  if (route.path === '/admin/dashboard') return '管理首页'
   const routeMap = {
     '/dashboard': '学情信息',
     '/record-manage': '学情记录',
     '/plan': '学习计划',
     '/qa': 'AI问答',
     '/resource': '资源推荐',
+    '/notes': '学习笔记',
     '/profile': '个人中心',
     '/settings': '设置'
   }

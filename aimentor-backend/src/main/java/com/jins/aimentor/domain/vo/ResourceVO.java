@@ -21,7 +21,7 @@ public class ResourceVO {
     private String description;
 
     /**
-     * 资源类型
+     * 资源类型（视频/文档/练习/音频）
      */
     private String type;
 
@@ -29,4 +29,14 @@ public class ResourceVO {
      * 资源链接
      */
     private String url;
+
+    /**
+     * 所属科目
+     */
+    private String subject;
+
+    /**
+     * 推荐指数
+     */
+    private Integer recommendScore;
 }

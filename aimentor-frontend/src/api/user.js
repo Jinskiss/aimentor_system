@@ -45,3 +45,15 @@ export const sendCode = (phone) => {
     data: { phone }
   })
 }
+
+/**
+ * 更新个人资料（姓名/邮箱/手机/性别/年级/简介）
+ * @param {Object} data { name, email, phone, gender, grade, bio }
+ */
+export const updateUserInfo = (data) => {
+  return request({
+    url: '/user/update',
+    method: 'put',
+    data
+  })
+}

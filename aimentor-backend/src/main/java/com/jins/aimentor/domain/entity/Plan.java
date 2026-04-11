@@ -9,7 +9,7 @@ import java.util.Date;
 /**
  * 学习计划实体类
  *
- * <p>对应数据库表：t_study_plan</p>
+ * <p>对应数据库表：plan（表名不带t_前缀）</p>
  * <p>存储学生的学习计划安排</p>
  *
  */
@@ -55,6 +55,16 @@ public class Plan {
      * 所属科目
      */
     private String subject;
+
+    /**
+     * 完成进度百分比(0-100)
+     */
+    private Integer progress;
+
+    /**
+     * 计划描述
+     */
+    private String description;
 
     /**
      * 创建时间

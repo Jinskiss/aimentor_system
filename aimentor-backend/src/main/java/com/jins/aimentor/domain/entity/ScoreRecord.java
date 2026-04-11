@@ -9,7 +9,7 @@ import java.util.Date;
 /**
  * 成绩记录实体类
  *
- * <p>对应数据库表：score_record</p>
+ * <p>对应数据库表：score_record（表名不带t_前缀）</p>
  * <p>存储学生的考试成绩信息</p>
  *
  */
@@ -49,6 +49,18 @@ public class ScoreRecord {
      * <p>默认100分</p>
      */
     private Integer fullScore;
+
+    /**
+     * 班级/年级排名
+     * <p>注意：rank 是 MySQL 保留关键字，需要用反引号转义</p>
+     */
+    @TableField("`rank`")
+    private Integer rank;
+
+    /**
+     * 备注
+     */
+    private String remarks;
 
     /**
      * 日期月份（格式：yyyy-MM）

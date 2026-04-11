@@ -66,8 +66,8 @@
             <el-icon><Timer /></el-icon>
           </div>
           <div class="stat-info">
-            <span class="stat-value">{{ registerDays || 0 }}</span>
-            <span class="stat-label">注册天数</span>
+            <span class="stat-value">{{ completedPlans || 0 }}</span>
+            <span class="stat-label">已完成计划</span>
           </div>
           <div class="stat-trend">
             <span>持续进步</span>
@@ -221,6 +221,7 @@
 import { onMounted, onUnmounted, ref, nextTick } from 'vue'
 import * as echarts from 'echarts'
 import { getScoreTrend, getWeakPoints, getKnowledgeMasteries } from '@/api/academic'
+import { getMyPlans } from '@/api/plan'
 import { ElMessage } from 'element-plus'
 import { useUserStore } from '@/stores/user'
 import {
@@ -251,7 +252,7 @@ const loading = ref(false)
 const totalScore = ref(0)
 const examCount = ref(0)
 const masteryCount = ref(0)
-const registerDays = ref(0)
+const completedPlans = ref(0)
 // ECharts 实例
 let trendChart = null
 let weakChart = null
@@ -472,12 +473,13 @@ onMounted(async () => {
       return
     }
 
-    // 计算注册天数（从 createTime 推算）
-    const createTime = userStore.userInfo?.createTime
-    if (createTime) {
-      const days = Math.floor((Date.now() - new Date(createTime).getTime()) / (1000 * 60 * 60 * 24)) + 1
-      registerDays.value = Math.max(days, 1)
-    }
+    // 获取已完成计划数（静默，不弹错）
+    getMyPlans().then(res => {
+      if (res?.code === 200 || res?.code === '200') {
+        completedPlans.value = (res.data || []).filter(p => p.status === '已完成').length
+      }
+    }).catch(() => {})
+
 
     const [trendRes, weakRes, allMasteryRes] = await Promise.all([
       getScoreTrend(),
@@ -518,9 +520,8 @@ onMounted(async () => {
       weakPoints.value = weakRes.data || []
     }
 
-  } catch (err) {
-    console.error('[Dashboard] 加载学情数据失败:', err)
-    ElMessage.error('加载学情数据失败，请检查网络或重新登录')
+  } catch {
+    // 单个接口失败不影响页面渲染，已通过 .catch 兜底
   } finally {
     loading.value = false
   }

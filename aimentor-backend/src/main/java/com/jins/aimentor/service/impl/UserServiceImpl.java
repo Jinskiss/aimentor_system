@@ -140,11 +140,38 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         UserVO userVO = new UserVO();
         userVO.setId(user.getId());
         userVO.setUsername(user.getUsername());
+        userVO.setName(user.getName());
         userVO.setEmail(user.getEmail());
         userVO.setPhone(user.getPhone());
+        userVO.setGender(user.getGender());
+        userVO.setGrade(user.getGrade());
+        userVO.setBio(user.getBio());
+        userVO.setRole(user.getRole());
+        userVO.setCreateTime(user.getCreateTime());
 
-        // 根据需要设置其他字段
         return userVO;
+    }
+
+    /**
+     * 更新用户信息（姓名/邮箱/手机/性别/年级/简介）
+     */
+    @Override
+    @Transactional
+    public void updateUserInfo(Long userId, User user) {
+        User existing = userMapper.selectById(userId);
+        if (existing == null) {
+            throw new BizException(Status.CODE_404, "用户不存在");
+        }
+        User update = new User();
+        update.setId(userId);
+        if (StringUtils.hasText(user.getName())) update.setName(user.getName());
+        if (StringUtils.hasText(user.getEmail())) update.setEmail(user.getEmail());
+        if (StringUtils.hasText(user.getPhone())) update.setPhone(user.getPhone());
+        if (StringUtils.hasText(user.getGender())) update.setGender(user.getGender());
+        if (StringUtils.hasText(user.getGrade())) update.setGrade(user.getGrade());
+        if (user.getBio() != null) update.setBio(user.getBio());
+        userMapper.updateById(update);
+        log.info("更新用户信息完成，userId: {}", userId);
     }
 
     /**

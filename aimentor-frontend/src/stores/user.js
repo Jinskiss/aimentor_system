@@ -10,6 +10,8 @@ export const useUserStore = defineStore('user', () => {
   // State
   const token = ref(localStorage.getItem('token') || '')
   const userInfo = ref(null)
+  // 标记用户信息是否已从后端拉取（避免刷新后直接跳转时数据为空）
+  const userInfoLoaded = ref(false)
 
   // Getters
   const isLoggedIn = computed(() => {
@@ -17,7 +19,7 @@ export const useUserStore = defineStore('user', () => {
     console.log('检查登录状态:', hasToken, 'token:', token.value?.substring(0, 20) + '...')
     return hasToken
   })
-  
+
   const username = computed(() => userInfo.value?.name || '')
 
   // Actions
@@ -30,27 +32,27 @@ export const useUserStore = defineStore('user', () => {
       console.log('调用登录API...')
       const res = await loginApi(loginForm)
       console.log('登录API响应:', res)
-      
+
       // 获取token
       const tokenValue = res.data
-      
+
       if (!tokenValue) {
         console.error('响应中没有token:', res)
         throw new Error('登录成功但未返回token')
       }
-      
+
       // 保存token
       token.value = tokenValue
       localStorage.setItem('token', tokenValue)
       console.log('token已保存:', tokenValue.substring(0, 20) + '...')
-      
+
       // 获取用户信息
       try {
         await fetchUserInfo()
       } catch (e) {
         console.warn('获取用户信息失败，但登录成功:', e)
       }
-      
+
       return res
     } catch (error) {
       console.error('登录过程错误:', error)
@@ -64,7 +66,7 @@ export const useUserStore = defineStore('user', () => {
    */
   const register = async (registerForm) => {
     console.log('=== store.register 被调用，参数:', registerForm);
-    
+
     try {
       console.log('调用注册API:', registerForm)
       const res = await registerApi(registerForm)
@@ -83,8 +85,13 @@ export const useUserStore = defineStore('user', () => {
     try {
       const res = await getUserInfoApi()
       console.log('用户信息响应:', res)
-      
+
       userInfo.value = res.data
+      userInfoLoaded.value = true
+      // 将角色同步到 localStorage，供路由守卫在页面刷新后仍能读取
+      if (res.data?.role) {
+        localStorage.setItem('userRole', res.data.role)
+      }
       return res.data
     } catch (error) {
       console.error('获取用户信息失败:', error)
@@ -95,19 +102,27 @@ export const useUserStore = defineStore('user', () => {
   /**
    * 退出登录
    */
-  const logout = () => {
+  const   logout = () => {
     token.value = ''
     userInfo.value = null
+    userInfoLoaded.value = false
     localStorage.removeItem('token')
+    localStorage.removeItem('userRole')
+  }
+
+  // 初始化：有 token 时自动拉取用户信息
+  if (token.value) {
+    fetchUserInfo()
   }
 
   return {
     token,
     userInfo,
+    userInfoLoaded,
     isLoggedIn,
     username,
     login,
-    register,  // 导出 register
+    register,
     fetchUserInfo,
     logout
   }
