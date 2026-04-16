@@ -62,12 +62,28 @@
             <template #title>教师首页</template>
           </el-menu-item>
           <el-menu-item index="/teacher/students">
-            <el-icon><User /></el-icon>
+            <el-icon><Edit /></el-icon>
             <template #title>学生学情</template>
+          </el-menu-item>
+          <el-menu-item index="/teacher/plan">
+            <el-icon><Calendar /></el-icon>
+            <template #title>班级计划</template>
+          </el-menu-item>
+          <el-menu-item index="/teacher/resource">
+            <el-icon><Collection /></el-icon>
+            <template #title>班级资源</template>
+          </el-menu-item>
+          <el-menu-item index="/teacher/notes">
+            <el-icon><Notebook /></el-icon>
+            <template #title>班级笔记</template>
+          </el-menu-item>
+          <el-menu-item index="/teacher/ai">
+            <el-icon><ChatDotRound /></el-icon>
+            <template #title>AI分析助手</template>
           </el-menu-item>
         </template>
 
-        <!-- ===== 管理员菜单（占位，后续开发）===== -->
+        <!-- ===== 管理员菜单 ===== -->
         <template v-else-if="currentRole === 'admin'">
           <el-menu-item index="/admin/dashboard">
             <el-icon><DataLine /></el-icon>
@@ -128,7 +144,7 @@
                     :class="['notif-item', { unread: !item.read }]"
                     @click="handleNotifClick(item)"
                   >
-                    <el-icon :color="item.type === 'success' ? '#67C23A' : '#409EFF'" class="notif-icon">
+                    <el-icon :color="item.type === 'success' ? '#ff6633' : '#ff6633'" class="notif-icon">
                       <component :is="item.icon" />
                     </el-icon>
                     <div class="notif-body">
@@ -173,7 +189,7 @@
         </div>
       </el-header>
 
-      <!-- 内容区 -->
+      <!-- 内容区域 -->
       <el-main class="main">
         <router-view v-slot="{ Component }">
           <transition name="fade" mode="out-in">
@@ -215,8 +231,8 @@ const route = useRoute()
 const isCollapse = ref(false)
 
 const notifications = ref([
-  { id: 1, type: 'success', icon: 'CircleCheck', text: '恭喜！你的学习计划「数学 - 第3天」已完成', time: '10分钟前', read: false, link: '/plan' },
-  { id: 2, type: 'info',    icon: 'ChatDotRound', text: 'AI 已回答你的问题：如何提高解题速度？', time: '1小时前',   read: false, link: '/qa' },
+  { id: 1, type: 'success', icon: 'CircleCheck', text: '恭喜！你的学习计划「数学7天」已完成', time: '10分钟前', read: false, link: '/plan' },
+  { id: 2, type: 'info',    icon: 'ChatDotRound', text: 'AI 已回答你的问题：如何提高解题速度', time: '1小时前',   read: false, link: '/qa' },
   { id: 3, type: 'info',   icon: 'Calendar',     text: '别忘了今天的学习计划，加油！',              time: '2小时前',   read: true,  link: '/plan' }
 ])
 const unreadCount = computed(() => notifications.value.filter(n => !n.read).length)
@@ -242,6 +258,10 @@ const menuActivePath = computed(() => {
   if (p.startsWith('/resource/')) return '/resource'
   if (p.startsWith('/teacher/student/')) return '/teacher/students'
   if (p.startsWith('/teacher/students')) return '/teacher/students'
+  if (p.startsWith('/teacher/plan')) return '/teacher/plan'
+  if (p.startsWith('/teacher/resource')) return '/teacher/resource'
+  if (p.startsWith('/teacher/notes')) return '/teacher/notes'
+  if (p.startsWith('/teacher/ai')) return '/teacher/ai'
   if (p.startsWith('/teacher/')) return '/teacher/dashboard'
   if (p.startsWith('/admin/')) return '/admin/dashboard'
   return p
@@ -251,6 +271,10 @@ const currentPageName = computed(() => {
   if (route.name === 'ResourceDetail') return '资源详情'
   if (route.path === '/teacher/dashboard') return '教师首页'
   if (route.path === '/teacher/students') return '学生学情'
+  if (route.path === '/teacher/plan') return '班级计划'
+  if (route.path === '/teacher/resource') return '班级资源'
+  if (route.path === '/teacher/notes') return '班级笔记'
+  if (route.path === '/teacher/ai') return 'AI分析助手'
   if (route.name === 'TeacherStudentDetail') return '学生学情详情'
   if (route.path === '/admin/dashboard') return '管理首页'
   const routeMap = {
@@ -293,18 +317,18 @@ const handleLogout = () => {
 
 <style scoped>
 .layout-container { height: 100vh; }
-.aside { background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%); display: flex; flex-direction: column; transition: width 0.3s; box-shadow: 2px 0 10px rgba(0,0,0,0.1); }
+.aside { background: linear-gradient(180deg, #304156 0%, #1a1a2e 100%); display: flex; flex-direction: column; transition: width 0.3s; box-shadow: 2px 0 10px rgba(0,0,0,0.2); }
 .logo { height: 70px; display: flex; align-items: center; justify-content: center; gap: 10px; padding: 0 15px; border-bottom: 1px solid rgba(255,255,255,0.1); transition: all 0.3s; }
 .logo-collapse { padding: 0; justify-content: center; }
 .logo-icon { color: #ff6633; display: flex; align-items: center; animation: float 3s ease-in-out infinite; }
 .logo-text { margin: 0; font-size: 18px; font-weight: 600; color: #fff; white-space: nowrap; }
 .el-menu-vertical { flex: 1; border-right: none; }
 .el-menu-vertical:not(.el-menu--collapse) { width: 220px; }
-:deep(.el-menu-item) { height: 56px; line-height: 56px; margin: 4px 8px; border-radius: 8px; transition: all 0.3s; }
-:deep(.el-menu-item:hover) { background: rgba(255,102,51,0.15) !important; color: #ff6633 !important; }
-:deep(.el-menu-item.is-active) { background: rgba(255,102,51,0.2) !important; color: #ff6633 !important; }
+:deep(.el-menu-item) { height: 50px; line-height: 50px; margin: 4px 12px; border-radius: 8px; transition: all 0.3s; font-size: 14px; }
+:deep(.el-menu-item:hover) { background: rgba(255, 102, 51, 0.15) !important; color: #ff6633 !important; }
+:deep(.el-menu-item.is-active) { background: linear-gradient(90deg, rgba(255, 102, 51, 0.3), rgba(255, 102, 51, 0.1)) !important; color: #fff !important; font-weight: 600; }
 :deep(.el-menu-item.is-active)::before { content: ''; position: absolute; left: 0; top: 50%; transform: translateY(-50%); width: 4px; height: 24px; background: #ff6633; border-radius: 0 4px 4px 0; }
-:deep(.el-menu-item .el-icon) { font-size: 20px; }
+:deep(.el-menu-item .el-icon) { font-size: 18px; margin-right: 8px; }
 .collapse-btn { padding: 15px; text-align: center; color: #666; cursor: pointer; border-top: 1px solid rgba(255,255,255,0.1); transition: all 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 13px; }
 .collapse-btn:hover { color: #ff6633; background: rgba(255,255,255,0.05); }
 .header { background: #fff; box-shadow: 0 1px 4px rgba(0,21,41,0.08); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; height: 60px !important; }
@@ -336,6 +360,6 @@ const handleLogout = () => {
 .notif-body { flex: 1; min-width: 0; }
 .notif-text { margin: 0 0 4px 0; font-size: 13px; color: #303133; line-height: 1.4; }
 .notif-time { font-size: 11px; color: #909399; }
-.notif-dot { width: 7px; height: 7px; background: #409EFF; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
+.notif-dot { width: 7px; height: 7px; background: #ff6633; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
 @media (max-width: 768px) { .user-detail, .breadcrumb { display: none; } }
 </style>

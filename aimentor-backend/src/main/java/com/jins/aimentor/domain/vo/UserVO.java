@@ -68,6 +68,11 @@ public class UserVO {
     private String bio;
 
     /**
+     * 用户头像URL
+     */
+    private String avatar;
+
+    /**
      * 角色
      */
     private String role;

@@ -1,7 +1,6 @@
 <template>
   <div class="plan-container">
 
-    <!-- ================== 页面标题 ================== -->
     <div class="page-header">
       <div class="header-left">
         <h2 class="page-title">学习计划</h2>
@@ -15,7 +14,6 @@
       </div>
     </div>
 
-    <!-- ================== 统计卡片 ================== -->
     <el-row :gutter="20" class="stats-row">
       <el-col :span="6">
         <div class="stat-card">
@@ -63,7 +61,6 @@
       </el-col>
     </el-row>
 
-    <!-- ================== 视图切换与筛选 ================== -->
     <el-card class="control-card">
       <div class="control-row">
         <div class="control-left">
@@ -106,7 +103,6 @@
       </div>
     </el-card>
 
-    <!-- ================== 日历视图（甘特图） ================== -->
     <el-card v-if="viewMode === 'calendar'" class="calendar-card">
       <template #header>
         <div class="card-header">
@@ -160,7 +156,6 @@
       </div>
     </el-card>
 
-    <!-- ================== 列表视图 ================== -->
     <el-card v-else class="plan-card">
       <template #header>
         <div class="card-header">
@@ -179,7 +174,7 @@
       <div v-else-if="filteredPlans.length === 0" class="empty-container">
         <el-icon class="empty-icon"><DocumentDelete /></el-icon>
         <h4>暂无学习计划</h4>
-        <p>点击上方按钮，生成你的第一个学习计划吧！</p>
+        <p>点击上方按钮，生成你的第一个学习计划吧</p>
       </div>
 
       <div v-else class="plan-list">
@@ -203,7 +198,6 @@
             <pre class="plan-text">{{ plan.content }}</pre>
           </div>
 
-          <!-- 进度条 -->
           <div class="plan-progress">
             <div class="progress-label">
               <span>完成进度</span>
@@ -211,7 +205,7 @@
             </div>
             <el-progress
               :percentage="plan.progress || 0"
-              :color="plan.progress >= 100 ? '#67C23A' : '#409EFF'"
+              :color="plan.progress >= 100 ? '#67C23A' : '#ff6633'"
               :stroke-width="8"
               :show-text="false"
             />
@@ -257,7 +251,6 @@
       </div>
     </el-card>
 
-    <!-- ================== 生成计划对话框 ================== -->
     <el-dialog
       v-model="dialogVisible"
       title="生成学习计划"
@@ -316,7 +309,6 @@
       </template>
     </el-dialog>
 
-    <!-- ================== 计划详情对话框 ================== -->
     <el-dialog
       v-model="detailVisible"
       :title="currentPlan?.subject + ' 学习计划'"
@@ -338,7 +330,7 @@
           </div>
           <el-progress
             :percentage="currentPlan.progress || 0"
-            :color="currentPlan.progress >= 100 ? '#67C23A' : '#409EFF'"
+            :color="currentPlan.progress >= 100 ? '#67C23A' : '#ff6633'"
             :stroke-width="12"
           />
         </div>
@@ -376,14 +368,12 @@ import {
   deletePlan
 } from '@/api/plan'
 
-// 科目选项
 const subjectOptions = [
   '数学', '语文', '英语', '物理', '化学', '生物',
   '历史', '地理', '政治',
   '信息技术', '通用技术'
 ]
 
-// 状态
 const plans = ref([])
 const loading = ref(false)
 const submitting = ref(false)
@@ -396,7 +386,6 @@ const viewMode = ref('list')
 const formRef = ref(null)
 const ganttRef = ref(null)
 
-// 日历视图相关
 const currentWeekStart = ref(getWeekStart(new Date()))
 
 function getWeekStart(date) {
@@ -458,14 +447,12 @@ const isPlanInRange = (plan, date) => {
   return date >= plan.startDate && date <= plan.endDate
 }
 
-// 表单
 const form = ref({
   subject: '',
   days: 7,
   note: ''
 })
 
-// 校验规则
 const rules = {
   subject: [
     { required: true, message: '请选择科目', trigger: 'change' }
@@ -475,12 +462,10 @@ const rules = {
   ]
 }
 
-// 统计
 const completedCount = computed(() => plans.value.filter(p => p.status === '已完成').length)
 const inProgressCount = computed(() => plans.value.filter(p => p.status !== '已完成').length)
 const uniqueSubjects = computed(() => new Set(plans.value.map(p => p.subject)).size)
 
-// 筛选后的计划
 const filteredPlans = computed(() => {
   let result = plans.value
   if (filterStatus.value) {
@@ -492,7 +477,6 @@ const filteredPlans = computed(() => {
   return result
 })
 
-// 加载计划列表
 const loadPlans = async () => {
   loading.value = true
   try {
@@ -506,12 +490,10 @@ const loadPlans = async () => {
   }
 }
 
-// 显示生成对话框
 const showGenerateDialog = () => {
   dialogVisible.value = true
 }
 
-// 重置表单
 const resetForm = () => {
   form.value = {
     subject: '',
@@ -521,7 +503,6 @@ const resetForm = () => {
   formRef.value?.resetFields()
 }
 
-// 生成计划
 const handleGenerate = async () => {
   try {
     await formRef.value.validate()
@@ -536,7 +517,7 @@ const handleGenerate = async () => {
       days: form.value.days
     })
     if (res.code === 200) {
-      ElMessage.success('学习计划生成成功！')
+      ElMessage.success('学习计划生成成功')
       dialogVisible.value = false
       resetForm()
       await loadPlans()
@@ -549,7 +530,6 @@ const handleGenerate = async () => {
   }
 }
 
-// 标记完成
 const handleComplete = async (id) => {
   try {
     await ElMessageBox.confirm('确定要将此计划标记为已完成吗？', '提示', {
@@ -573,7 +553,6 @@ const handleComplete = async (id) => {
   }
 }
 
-// 从详情弹窗标记完成
 const handleCompleteFromDetail = async () => {
   if (currentPlan.value) {
     await handleComplete(currentPlan.value.id)
@@ -581,16 +560,14 @@ const handleCompleteFromDetail = async () => {
   }
 }
 
-// 查看详情
 const showPlanDetail = (plan) => {
   currentPlan.value = plan
   detailVisible.value = true
 }
 
-// 删除计划
 const handleDelete = async (id) => {
   try {
-    await ElMessageBox.confirm('确定要删除此学习计划吗？删除后无法恢复。', '警告', {
+    await ElMessageBox.confirm('确定要删除此学习计划吗？删除后无法恢复', '警告', {
       confirmButtonText: '删除',
       cancelButtonText: '取消',
       type: 'warning'
@@ -621,14 +598,13 @@ onMounted(() => {
   padding: 10px;
 }
 
-/* 页面标题 */
 .page-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
   padding: 20px 24px;
-  background: linear-gradient(135deg, #409EFF, #66b1ff);
+  background: linear-gradient(135deg, #ff6633, #ff8855);
   border-radius: 16px;
   color: #fff;
 }
@@ -647,7 +623,7 @@ onMounted(() => {
 
 .generate-btn {
   background: #fff !important;
-  color: #409EFF !important;
+  color: #ff6633 !important;
   border: none !important;
   font-weight: 600;
 }
@@ -656,7 +632,6 @@ onMounted(() => {
   background: rgba(255, 255, 255, 0.9) !important;
 }
 
-/* 统计卡片行 */
 .stats-row {
   margin-bottom: 20px;
 }
@@ -687,7 +662,7 @@ onMounted(() => {
   font-size: 28px;
 }
 
-.stat-icon.gradient-blue { background: linear-gradient(135deg, #409EFF, #66b1ff); color: #fff; }
+.stat-icon.gradient-blue { background: linear-gradient(135deg, #ff6633, #ff8855); color: #fff; }
 .stat-icon.gradient-green { background: linear-gradient(135deg, #67C23A, #85ce61); color: #fff; }
 .stat-icon.gradient-orange { background: linear-gradient(135deg, #909CF0, #A8B4F5); color: #fff; }
 .stat-icon.gradient-purple { background: linear-gradient(135deg, #9370DB, #ba8fdb); color: #fff; }
@@ -709,7 +684,6 @@ onMounted(() => {
   margin-top: 2px;
 }
 
-/* 控制卡片 */
 .control-card {
   margin-bottom: 16px;
   border-radius: 12px;
@@ -731,7 +705,6 @@ onMounted(() => {
   align-items: center;
 }
 
-/* 日历卡片 */
 .calendar-card {
   margin-bottom: 16px;
   border-radius: 12px;
@@ -757,7 +730,7 @@ onMounted(() => {
   font-size: 20px;
 }
 
-.card-icon.blue { color: #409EFF; }
+.card-icon.blue { color: #ff6633; }
 .card-icon.orange { color: #909CF0; }
 
 .calendar-nav {
@@ -774,7 +747,6 @@ onMounted(() => {
   text-align: center;
 }
 
-/* 甘特图 */
 .gantt-container {
   padding: 16px;
 }
@@ -809,7 +781,7 @@ onMounted(() => {
 }
 
 .gantt-day.today {
-  background: rgba(64, 158, 255, 0.1);
+  background: rgba(255, 102, 51, 0.1);
 }
 
 .day-name {
@@ -851,7 +823,7 @@ onMounted(() => {
 }
 
 .gantt-bar.in-progress {
-  background: linear-gradient(135deg, #409EFF, #66b1ff);
+  background: linear-gradient(135deg, #ff6633, #ff8855);
 }
 
 .gantt-bar.completed {
@@ -865,7 +837,6 @@ onMounted(() => {
   display: block;
 }
 
-/* 计划卡片 */
 .plan-card {
   border-radius: 16px;
   overflow: hidden;
@@ -876,7 +847,6 @@ onMounted(() => {
   border-bottom: none;
 }
 
-/* 加载和空状态 */
 .loading-container,
 .empty-container {
   display: flex;
@@ -904,7 +874,6 @@ onMounted(() => {
   margin-bottom: 16px;
 }
 
-/* 计划列表 */
 .plan-list {
   display: flex;
   flex-direction: column;
@@ -916,7 +885,7 @@ onMounted(() => {
   background: #f5f7fa;
   border-radius: 12px;
   padding: 16px 20px;
-  border-left: 4px solid #409EFF;
+  border-left: 4px solid #ff6633;
   transition: all 0.3s;
 }
 
@@ -951,7 +920,6 @@ onMounted(() => {
   margin: 0;
 }
 
-/* 进度条 */
 .plan-progress {
   margin-bottom: 12px;
   padding: 12px;
@@ -988,14 +956,12 @@ onMounted(() => {
   gap: 8px;
 }
 
-/* 表单提示 */
 .form-tip {
   font-size: 12px;
   color: #909399;
   margin-top: 6px;
 }
 
-/* 详情弹窗 */
 .plan-detail {
   padding: 10px 0;
 }

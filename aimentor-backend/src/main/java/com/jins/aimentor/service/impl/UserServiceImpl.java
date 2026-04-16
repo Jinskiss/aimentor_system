@@ -146,6 +146,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         userVO.setGender(user.getGender());
         userVO.setGrade(user.getGrade());
         userVO.setBio(user.getBio());
+        userVO.setAvatar(user.getAvatar());
         userVO.setRole(user.getRole());
         userVO.setCreateTime(user.getCreateTime());
 
@@ -231,5 +232,22 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         }
 
         return isValid;
+    }
+
+    /**
+     * 更新用户头像
+     */
+    @Override
+    @Transactional
+    public void updateAvatar(Long userId, String avatar) {
+        User user = userMapper.selectById(userId);
+        if (user == null) {
+            throw new BizException(Status.CODE_404, "用户不存在");
+        }
+        User update = new User();
+        update.setId(userId);
+        update.setAvatar(avatar);
+        userMapper.updateById(update);
+        log.info("[UserService] 更新头像完成，userId: {}, avatar: {}", userId, avatar);
     }
 }

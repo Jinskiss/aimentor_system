@@ -3,12 +3,13 @@ package com.jins.aimentor.config;
 import com.jins.aimentor.interceptor.JwtInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 /**
  * 拦截器配置
- * 权限开关
+ * 权限开关 + 跨域配置
  */
 @Configuration
 public class InterceptorConfig implements WebMvcConfigurer {
@@ -25,18 +26,28 @@ public class InterceptorConfig implements WebMvcConfigurer {
                         "/api/user/login",
                         "/api/user/register",
                         "/api/user/sendCode",
-                        "/error", // 添加系统错误路径
+                        "/error",
                         "/doc.html",
                         "/webjars/**",
                         "/v2/api-docs/**",
                         "/swagger-resources/**",
                         "/swagger-ui/**",
-                        "/favicon.ico"
-                )
-                .order(0);
-
-        WebMvcConfigurer.super.addInterceptors(registry);
+                        "/favicon.ico",
+                        "/uploads/**"
+                );
     }
 
-
+    /**
+     * 配置跨域访问
+     * 允许所有来源、所有请求方法、允许携带凭证
+     */
+    @Override
+    public void addCorsMappings(CorsRegistry registry) {
+        registry.addMapping("/**")
+                .allowedOriginPatterns("*")
+                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                .allowedHeaders("*")
+                .allowCredentials(true)
+                .maxAge(3600);
+    }
 }

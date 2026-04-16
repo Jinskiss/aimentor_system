@@ -1,6 +1,5 @@
 <template>
   <div class="dashboard">
-    <!-- ================== 页面标题 ================== -->
     <div class="page-header">
       <div class="header-left">
         <h2 class="page-title">学情分析仪表盘</h2>
@@ -28,7 +27,6 @@
       </div>
     </div>
 
-    <!-- ================== 统计卡片行 ================== -->
     <el-row :gutter="20" class="stats-row">
       <el-col :span="6">
         <div class="stat-card">
@@ -41,7 +39,7 @@
           </div>
           <div class="stat-trend up">
             <el-icon><Top /></el-icon>
-            <span>较上月</span>
+            <span>较上周</span>
           </div>
         </div>
       </el-col>
@@ -56,7 +54,7 @@
           </div>
           <div class="stat-trend up">
             <el-icon><Top /></el-icon>
-            <span>学习中</span>
+            <span>学习计划</span>
           </div>
         </div>
       </el-col>
@@ -76,13 +74,6 @@
       </el-col>
     </el-row>
 
-    <!-- ============================================================
-         图表行：四个并排的图表卡片
-         - 成绩趋势折线图
-         - 知识点掌握度柱状图
-         - 学科能力雷达图
-         - 成绩分布饼图
-         ============================================================ -->
     <el-row :gutter="20">
       <el-col :xs="24" :sm="24" :md="12" :lg="12">
         <el-card class="chart-card">
@@ -141,9 +132,6 @@
       </el-col>
     </el-row>
 
-    <!-- ============================================================
-         薄弱知识点详情卡片
-         ============================================================ -->
     <el-row :gutter="20" style="margin-top: 20px;">
       <el-col :span="24">
         <el-card class="weak-card">
@@ -177,7 +165,7 @@
                 <div class="weak-point-item" :style="{ animationDelay: idx * 0.05 + 's' }">
                   <div class="weak-header">
                     <span class="weak-index">{{ idx + 1 }}</span>
-                    <span class="weak-name">{{ item.knowledge }}</span>
+                    <span class="weakname">{{ item.knowledge }}</span>
                   </div>
                   <div class="weak-progress">
                     <div class="progress-info">
@@ -197,8 +185,8 @@
                     <el-tag :type="getMasteryType(item.mastery)" size="small">
                       {{ getMasteryLabel(item.mastery) }}
                     </el-tag>
-                    <el-button type="primary" link size="small">
-                      去学习 <el-icon><ArrowRight /></el-icon>
+                    <el-button type="primary" link size="small" @click="goToStudy(item)">
+                      去学习<el-icon><ArrowRight /></el-icon>
                     </el-button>
                   </div>
                 </div>
@@ -219,6 +207,7 @@
 
 <script setup>
 import { onMounted, onUnmounted, ref, nextTick } from 'vue'
+import { useRouter } from 'vue-router'
 import * as echarts from 'echarts'
 import { getScoreTrend, getWeakPoints, getKnowledgeMasteries } from '@/api/academic'
 import { getMyPlans } from '@/api/plan'
@@ -240,28 +229,32 @@ import {
   Top
 } from '@element-plus/icons-vue'
 
-// 图表 DOM 引用
 const trendChartRef = ref(null)
 const weakChartRef = ref(null)
 const radarChartRef = ref(null)
 const pieChartRef = ref(null)
 
-// 页面数据
 const weakPoints = ref([])
 const loading = ref(false)
 const totalScore = ref(0)
 const examCount = ref(0)
 const masteryCount = ref(0)
 const completedPlans = ref(0)
-// ECharts 实例
 let trendChart = null
 let weakChart = null
 let radarChart = null
 let pieChart = null
 
 const userStore = useUserStore()
+const router = useRouter()
 
-// 辅助方法
+const goToStudy = (item) => {
+  router.push({
+    path: '/qa',
+    query: { knowledge: item.knowledge, subject: item.subject }
+  })
+}
+
 const getMasteryType = (mastery) => {
   if (mastery < 30) return 'info'
   if (mastery < 60) return 'info'
@@ -271,7 +264,7 @@ const getMasteryType = (mastery) => {
 const getMasteryColor = (mastery) => {
   if (mastery < 30) return '#B4A0F0'
   if (mastery < 60) return '#909CF0'
-  return '#67C23A'
+  return '#ff6633'
 }
 
 const getMasteryLabel = (mastery) => {
@@ -280,7 +273,6 @@ const getMasteryLabel = (mastery) => {
   return '良好'
 }
 
-// 初始化成绩趋势折线图
 const initTrendChart = (data) => {
   if (!trendChartRef.value) return
 
@@ -328,7 +320,6 @@ const initTrendChart = (data) => {
   trendChart.setOption(option)
 }
 
-// 初始化知识点掌握度柱状图
 const initWeakChart = (data) => {
   if (!weakChartRef.value) return
 
@@ -341,7 +332,7 @@ const initWeakChart = (data) => {
 
   const barData = data.map(item => ({
     value: item.mastery,
-    itemStyle: { color: item.mastery < 60 ? '#909CF0' : '#67C23A' }
+    itemStyle: { color: item.mastery < 60 ? '#909CF0' : '#ff6633' }
   }))
 
   const option = {
@@ -371,7 +362,6 @@ const initWeakChart = (data) => {
   weakChart.setOption(option)
 }
 
-// 初始化雷达图
 const initRadarChart = (data) => {
   if (!radarChartRef.value) return
 
@@ -412,7 +402,6 @@ const initRadarChart = (data) => {
   radarChart.setOption(option)
 }
 
-// 初始化饼图
 const initPieChart = (data) => {
   if (!pieChartRef.value) return
 
@@ -442,8 +431,8 @@ const initPieChart = (data) => {
       },
       labelLine: { show: false },
       data: [
-        { value: excellent, name: '优秀(≥80)', itemStyle: { color: '#67C23A' } },
-        { value: good, name: '良好(60-80)', itemStyle: { color: '#409EFF' } },
+        { value: excellent, name: '优秀(>=80)', itemStyle: { color: '#ff6633' } },
+        { value: good, name: '良好(60-80)', itemStyle: { color: '#ff6633' } },
         { value: fair, name: '一般(30-60)', itemStyle: { color: '#909CF0' } },
         { value: poor, name: '薄弱(<30)', itemStyle: { color: '#B4A0F0' } }
       ]
@@ -453,7 +442,6 @@ const initPieChart = (data) => {
   pieChart.setOption(option)
 }
 
-// 窗口大小变化时重绘图表
 const handleResize = () => {
   trendChart?.resize()
   weakChart?.resize()
@@ -473,13 +461,11 @@ onMounted(async () => {
       return
     }
 
-    // 获取已完成计划数（静默，不弹错）
     getMyPlans().then(res => {
       if (res?.code === 200 || res?.code === '200') {
         completedPlans.value = (res.data || []).filter(p => p.status === '已完成').length
       }
     }).catch(() => {})
-
 
     const [trendRes, weakRes, allMasteryRes] = await Promise.all([
       getScoreTrend(),
@@ -489,12 +475,10 @@ onMounted(async () => {
 
     await nextTick()
 
-    // 成绩趋势图
     if (trendRes.code === 200 || trendRes.code === '200') {
       const trendData = trendRes.data || []
       if (trendData.length > 0) {
         initTrendChart(trendData)
-        // 计算统计数据
         totalScore.value = Math.round(trendData.reduce((sum, item) => sum + item.avgScore, 0) / trendData.length)
         examCount.value = trendData.length
       } else {
@@ -502,7 +486,6 @@ onMounted(async () => {
       }
     }
 
-    // 知识点柱状图
     if (allMasteryRes.code === 200 || allMasteryRes.code === '200') {
       const masteryList = allMasteryRes.data || []
       if (masteryList.length > 0) {
@@ -515,13 +498,11 @@ onMounted(async () => {
       }
     }
 
-    // 薄弱知识点卡片
     if (weakRes.code === 200 || weakRes.code === '200') {
       weakPoints.value = weakRes.data || []
     }
 
   } catch {
-    // 单个接口失败不影响页面渲染，已通过 .catch 兜底
   } finally {
     loading.value = false
   }
@@ -544,7 +525,6 @@ onUnmounted(() => {
   padding: 10px;
 }
 
-/* 页面头部 */
 .page-header {
   display: flex;
   justify-content: space-between;
@@ -582,12 +562,11 @@ onUnmounted(() => {
   border-radius: 12px;
 }
 
-.stat-icon.blue { background: rgba(64, 158, 255, 0.2); color: #409EFF; }
+.stat-icon.blue { background: rgba(255, 102, 51, 0.2); color: #ff6633; }
 .stat-icon.orange { background: rgba(144, 156, 240, 0.2); color: #909CF0; }
-.stat-icon.green { background: rgba(103, 194, 58, 0.2); color: #67C23A; }
+.stat-icon.green { background: rgba(255, 102, 51, 0.2); color: #ff6633; }
 .stat-icon.purple { background: rgba(147, 112, 219, 0.2); color: #9370DB; }
 
-/* 统计卡片行 */
 .stats-row {
   margin-bottom: 20px;
 }
@@ -620,8 +599,8 @@ onUnmounted(() => {
   font-size: 24px;
 }
 
-.stat-icon.gradient-blue { background: linear-gradient(135deg, #409EFF, #66b1ff); color: #fff; }
-.stat-icon.gradient-green { background: linear-gradient(135deg, #67C23A, #85ce61); color: #fff; }
+.stat-icon.gradient-blue { background: linear-gradient(135deg, #ff6633, #ff8855); color: #fff; }
+.stat-icon.gradient-green { background: linear-gradient(135deg, #ff6633, #ff8855); color: #fff; }
 .stat-icon.gradient-orange { background: linear-gradient(135deg, #909CF0, #A8B4F5); color: #fff; }
 .stat-icon.gradient-purple { background: linear-gradient(135deg, #9370DB, #ba8fdb); color: #fff; }
 
@@ -650,14 +629,13 @@ onUnmounted(() => {
   align-items: center;
   gap: 4px;
   font-size: 12px;
-  color: #67C23A;
+  color: #ff6633;
 }
 
 .stat-trend.up {
-  color: #67C23A;
+  color: #ff6633;
 }
 
-/* 图表卡片 */
 .chart-card, .weak-card {
   border-radius: 16px;
   overflow: hidden;
@@ -697,12 +675,11 @@ onUnmounted(() => {
 }
 
 .card-icon.orange { background: rgba(144, 156, 240, 0.1); color: #909CF0; }
-.card-icon.blue { background: rgba(64, 158, 255, 0.1); color: #409EFF; }
+.card-icon.blue { background: rgba(255, 102, 51, 0.1); color: #ff6633; }
 .card-icon.purple { background: rgba(147, 112, 219, 0.1); color: #9370DB; }
-.card-icon.green { background: rgba(103, 194, 58, 0.1); color: #67C23A; }
+.card-icon.green { background: rgba(255, 102, 51, 0.1); color: #ff6633; }
 .card-icon.red { background: rgba(180, 160, 240, 0.1); color: #B4A0F0; }
 
-/* 加载和空状态 */
 .loading-container, .empty-container {
   display: flex;
   flex-direction: column;
@@ -725,11 +702,10 @@ onUnmounted(() => {
 
 .empty-icon {
   font-size: 64px;
-  color: #67C23A;
+  color: #ff6633;
   margin-bottom: 16px;
 }
 
-/* 薄弱知识点卡片 */
 .weak-points-container {
   padding: 10px 0;
 }
@@ -809,7 +785,6 @@ onUnmounted(() => {
   align-items: center;
 }
 
-/* 深度选择器 */
 :deep(.el-card__body) {
   padding: 16px;
 }

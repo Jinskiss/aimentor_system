@@ -109,4 +109,23 @@ public class UserController {
         userService.updateUserInfo(current.getId(), user);
         return Result.success(null);
     }
+
+    /**
+     * 更新头像URL
+     */
+    @ApiOperation("更新头像URL")
+    @PutMapping("/avatar")
+    public Result<Void> updateAvatar(@RequestBody java.util.Map<String, String> body) {
+        User current = UserHolder.getUser();
+        if (current == null) {
+            return Result.error("用户未登录");
+        }
+        String avatarUrl = body.get("avatar");
+        if (avatarUrl == null || avatarUrl.isEmpty()) {
+            return Result.error("头像URL不能为空");
+        }
+        userService.updateAvatar(current.getId(), avatarUrl);
+        log.info("[UserController] 更新头像，userId={}, avatar={}", current.getId(), avatarUrl);
+        return Result.success(null);
+    }
 }

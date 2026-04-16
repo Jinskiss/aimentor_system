@@ -31,6 +31,11 @@ public class ResourceVO {
     private String url;
 
     /**
+     * 封面图片URL
+     */
+    private String coverImage;
+
+    /**
      * 所属科目
      */
     private String subject;

@@ -1,7 +1,6 @@
 <template>
   <div class="qa-container">
 
-    <!-- ================== 页面标题栏 ================== -->
     <div class="qa-header">
       <div class="header-left">
         <div class="header-icon-wrapper">
@@ -32,19 +31,17 @@
       </div>
     </div>
 
-    <!-- ================== 聊天卡片 ================== -->
     <el-card class="qa-card" body-style="padding: 0">
 
-      <!-- 欢迎提示（首次打开时显示） -->
       <div v-if="messages.length === 0" class="welcome-area">
         <div class="welcome-icon">
           <el-icon :size="56" color="#ff6633"><ChatDotRound /></el-icon>
         </div>
         <h3 class="welcome-title">你好，我是 AI 学习助手</h3>
         <p class="welcome-desc">
-          我可以帮你解答学习问题、解释概念、辅导作业。<br>
+          我可以帮你解答学习问题、解释概念、辅导作业<br>
           试试问我：「函数是什么？」「帮我分析这道物理题」<br>
-          我支持 Markdown 格式，回答中的代码会自动高亮显示。
+          我支持 Markdown 格式，回答中的代码会自动高亮显示
         </p>
         <div class="quick-questions">
           <div class="quick-label">快捷问题</div>
@@ -61,7 +58,6 @@
           </el-tag>
         </div>
 
-        <!-- 功能介绍卡片 -->
         <div class="feature-cards">
           <div class="feature-card">
             <div class="feature-icon">📚</div>
@@ -81,7 +77,6 @@
         </div>
       </div>
 
-      <!-- 消息列表 -->
       <div
         v-else
         class="chat-history"
@@ -94,7 +89,7 @@
         >
           <div :class="['avatar', msg.role]">
             <el-avatar v-if="msg.role === 'ai'" :size="36" style="background: linear-gradient(135deg, #ff6633, #ff8855);">AI</el-avatar>
-            <el-avatar v-else :size="36" style="background: #409EFF;">我</el-avatar>
+            <el-avatar v-else :size="36" style="background: #ff6633;">我</el-avatar>
           </div>
 
           <div :class="['bubble-wrap', msg.role]">
@@ -106,7 +101,6 @@
             <div v-if="msg.role === 'ai'" class="markdown-body" v-html="renderMarkdown(msg.displayContent || msg.content)" />
             <div v-else class="user-content">{{ msg.content }}</div>
 
-            <!-- AI 消息操作栏 -->
             <div v-if="msg.role === 'ai'" class="message-actions">
               <el-tooltip content="复制回答" placement="top">
                 <el-button text size="small" @click="copyMessage(msg.content)">
@@ -127,7 +121,6 @@
           </div>
         </div>
 
-        <!-- AI 正在输入动画 -->
         <div v-if="aiTyping" class="message-row ai">
           <div class="avatar ai">
             <el-avatar :size="36" style="background: linear-gradient(135deg, #ff6633, #ff8855);">AI</el-avatar>
@@ -146,7 +139,6 @@
         </div>
       </div>
 
-      <!-- ================== 输入区域 ================== -->
       <div class="input-area">
         <div class="input-wrapper">
           <el-input
@@ -191,36 +183,16 @@
 
     </el-card>
 
-    <!-- 复制成功提示 -->
-    <el-toast />
   </div>
 </template>
 
 <script setup>
-/**
- * Qa.vue - AI 问答页面（增强版）
- *
- * 功能说明：
- *   1. 展示对话历史（用户消息 + AI 回答）
- *   2. AI 回答支持 Markdown 渲染（代码高亮、列表、粗体等）
- *   3. 多轮对话：同一会话中的问答会保持上下文（Python 服务维护历史）
- *   4. 清空对话：发送 /api/qa/reset 请求
- *   5. 快捷问题：首次打开时展示常用示例问题
- *   6. 打字机效果：AI 回答逐字显示
- *   7. 时间戳：每条消息显示发送时间
- *   8. 复制功能：一键复制 AI 回答
- *
- * 接口说明：
- *   - POST /api/qa/ask  { question, sessionId }  -> 获取 AI 回答
- *   - POST /api/qa/reset { sessionId }            -> 清空对话历史
- */
-
-import { ref, nextTick, onMounted } from 'vue'
-import { ElMessage, ElToast } from 'element-plus'
+import { ref, nextTick, onMounted, onUnmounted } from 'vue'
+import { useRoute } from 'vue-router'
+import { ElMessage } from 'element-plus'
 import { ChatDotRound, Delete, WarningFilled, DocumentCopy, RefreshRight, Lightning, Promotion, InfoFilled } from '@element-plus/icons-vue'
 import { askQuestion, resetConversation } from '@/api/qa'
 
-// ================== 状态 ==================
 const question = ref('')
 const loading = ref(false)
 const aiTyping = ref(false)
@@ -230,15 +202,36 @@ const chatHistoryRef = ref(null)
 const sessionId = ref('default')
 const typingInterval = ref(null)
 
-// ================== 快捷问题 ==================
+// 获取路由参数（从Dashboard跳转过来时带的知识点）
+const route = useRoute()
+
+// 如果有知识点参数，自动发送问题
+onMounted(() => {
+  console.log('[Qa] AI 问答页面已挂载，当前会话 ID:', sessionId.value)
+  
+  // 检查是否有从Dashboard传来的知识点参数
+  if (route.query.knowledge) {
+    const knowledge = route.query.knowledge
+    const subject = route.query.subject || ''
+    const autoQuestion = subject 
+      ? `请帮我学习${subject}科目的知识点"${knowledge}"，给出学习建议`
+      : `请帮我学习知识点"${knowledge}"，给出学习建议`
+    
+    // 延迟发送，让页面先渲染完成
+    setTimeout(() => {
+      question.value = autoQuestion
+      handleSend()
+    }, 500)
+  }
+})
+
 const quickQuestions = [
   '三角函数公式有哪些？',
   '帮我讲讲牛顿定律',
-  '英语语法怎么学',
+  '英语语法怎么学？',
   '化学反应方程式怎么配平',
 ]
 
-// ================== 格式化时间 ==================
 const formatTime = (date) => {
   const now = date || new Date()
   const hours = String(now.getHours()).padStart(2, '0')
@@ -246,15 +239,6 @@ const formatTime = (date) => {
   return `${hours}:${minutes}`
 }
 
-// ================== Markdown 渲染（纯前端实现）====================
-
-/**
- * 将 Markdown 文本渲染为 HTML
- * 支持：代码块、行内代码、粗体、斜体、标题、列表、换行
- *
- * @param {string} text 原始 Markdown 文本
- * @returns {string} 渲染后的 HTML 字符串
- */
 const renderMarkdown = (text) => {
   if (!text) return ''
 
@@ -290,13 +274,6 @@ const renderMarkdown = (text) => {
   return '<p>' + html + '</p>'
 }
 
-// ================== 打字机效果 ==================
-
-/**
- * 打字机效果显示 AI 回答
- * @param {number} index 消息索引
- * @param {string} fullText 完整回答文本
- */
 const typeWriter = (index, fullText) => {
   const msg = messages.value[index]
   if (!msg) return
@@ -314,15 +291,9 @@ const typeWriter = (index, fullText) => {
       typingInterval.value = null
       scrollToBottom()
     }
-  }, 20) // 每20ms显示一个字符
+  }, 20)
 }
 
-// ================== 发送消息 ==================
-
-/**
- * 发送问题给 AI
- * 流程：追加用户消息 -> 调用后端 -> 追加 AI 回答 -> 滚动到底部
- */
 const handleSend = async () => {
   const q = question.value.trim()
   if (!q || loading.value) return
@@ -355,7 +326,7 @@ const handleSend = async () => {
 
       aiTyping.value = false
       typeWriter(aiIndex, res.data.answer)
-      console.log('[Qa] AI 回答接收成功，长度:', res.data.answer.length, '字符')
+      console.log('[Qa] AI 回答接收成功，长度', res.data.answer.length, '字符')
     } else {
       aiTyping.value = false
       messages.value.push({
@@ -367,7 +338,7 @@ const handleSend = async () => {
       console.error('[Qa] AI 回答失败:', res.msg)
     }
   } catch (err) {
-    console.error('[Qa] 发送请求失败:', err)
+    console.error('[Qa] 发送请求失败', err)
     aiTyping.value = false
     messages.value.push({
       role: 'ai',
@@ -377,7 +348,7 @@ const handleSend = async () => {
     })
   } finally {
     loading.value = false
-    await nextTick()
+    nextTick()
     scrollToBottom()
   }
 }
@@ -387,9 +358,6 @@ const sendQuickQuestion = (q) => {
   handleSend()
 }
 
-/**
- * 清空对话历史
- */
 const handleReset = async () => {
   resetting.value = true
   try {
@@ -405,9 +373,6 @@ const handleReset = async () => {
   }
 }
 
-/**
- * 复制消息内容
- */
 const copyMessage = async (content) => {
   try {
     await navigator.clipboard.writeText(content)
@@ -417,9 +382,6 @@ const copyMessage = async (content) => {
   }
 }
 
-/**
- * 重新生成回答
- */
 const regenerateMessage = async (index) => {
   if (index > 0 && messages.value[index - 1]?.role === 'user') {
     const lastQuestion = messages.value[index - 1].content
@@ -449,7 +411,6 @@ onMounted(() => {
   box-sizing: border-box;
 }
 
-/* 页面标题栏 */
 .qa-header {
   display: flex;
   align-items: center;
@@ -503,7 +464,7 @@ onMounted(() => {
 .status-dot {
   width: 8px;
   height: 8px;
-  background: #67C23A;
+  background: #ff6633;
   border-radius: 50%;
   animation: pulse 2s infinite;
 }
@@ -530,7 +491,6 @@ onMounted(() => {
   background: rgba(255, 255, 255, 0.3);
 }
 
-/* 聊天卡片 */
 .qa-card {
   flex: 1;
   display: flex;
@@ -539,7 +499,6 @@ onMounted(() => {
   border-radius: 12px;
 }
 
-/* 欢迎区 */
 .welcome-area {
   flex: 1;
   display: flex;
@@ -555,7 +514,7 @@ onMounted(() => {
   width: 100px;
   height: 100px;
   border-radius: 50%;
-  background: linear-gradient(135deg, rgba(255, 102, 51, 0.1), rgba(255, 136, 85, 0.1));
+  background: linear-gradient(135deg, rgba(255, 102, 51, 0.1), rgba(102, 177, 255, 0.1));
   display: flex;
   align-items: center;
   justify-content: center;
@@ -610,7 +569,6 @@ onMounted(() => {
   border-color: transparent !important;
 }
 
-/* 功能卡片 */
 .feature-cards {
   display: flex;
   gap: 16px;
@@ -651,7 +609,6 @@ onMounted(() => {
   color: #909399;
 }
 
-/* 消息列表 */
 .chat-history {
   flex: 1;
   overflow-y: auto;
@@ -709,14 +666,14 @@ onMounted(() => {
 }
 
 .user-content {
-  background: linear-gradient(135deg, #409EFF, #66b1ff);
+  background: linear-gradient(135deg, #ff6633, #ff8855);
   color: #fff;
   padding: 12px 16px;
   border-radius: 16px 16px 4px 16px;
   font-size: 14px;
   line-height: 1.6;
   word-break: break-word;
-  box-shadow: 0 2px 8px rgba(64, 158, 255, 0.3);
+  box-shadow: 0 2px 8px rgba(255, 102, 51, 0.3);
 }
 
 .bubble-wrap.ai .user-content {
@@ -736,7 +693,6 @@ onMounted(() => {
   border: 1px solid #f0f0f0;
 }
 
-/* Markdown 渲染样式 */
 .markdown-body :deep(h1),
 .markdown-body :deep(h2),
 .markdown-body :deep(h3) { margin: 12px 0 6px; color: #303133; }
@@ -778,7 +734,6 @@ onMounted(() => {
 .markdown-body :deep(strong) { color: #303133; font-weight: 600; }
 .markdown-body :deep(em) { color: #606266; }
 
-/* 消息操作栏 */
 .message-actions {
   display: flex;
   gap: 4px;
@@ -809,7 +764,6 @@ onMounted(() => {
   margin-top: 6px;
 }
 
-/* 正在输入气泡 */
 .typing-bubble {
   background: #fff;
   padding: 14px 18px;
@@ -818,7 +772,6 @@ onMounted(() => {
   border: 1px solid #f0f0f0;
 }
 
-/* 输入动画 */
 .typing-indicator {
   display: flex;
   gap: 4px;
@@ -841,7 +794,6 @@ onMounted(() => {
   40% { transform: scale(1); opacity: 1; }
 }
 
-/* 输入区域 */
 .input-area {
   padding: 16px 20px;
   border-top: 1px solid #f0f0f0;
@@ -901,7 +853,6 @@ onMounted(() => {
   box-shadow: 0 4px 12px rgba(255, 102, 51, 0.4);
 }
 
-/* 动画 */
 @keyframes fadeIn {
   from {
     opacity: 0;

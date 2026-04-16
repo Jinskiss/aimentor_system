@@ -20,7 +20,14 @@ const routes = [
   {
     path: '/',
     component: () => import('@/views/Layout.vue'),
-    redirect: getDefaultRoute,
+    redirect: to => {
+      const token = localStorage.getItem('token')
+      const role = localStorage.getItem('userRole')
+      // 未登录直接跳转登录页
+      if (!token) return '/login'
+      // 统一跳转到资源页面
+      return '/resource'
+    },
     children: [
       // ===== 学生路由 =====
       {
@@ -95,6 +102,30 @@ const routes = [
         name: 'TeacherStudentDetail',
         component: () => import('@/views/TeacherStudentDetail.vue'),
         meta: { title: '学生学情详情', roles: ['teacher'] }
+      },
+      {
+        path: 'teacher/plan',
+        name: 'TeacherPlan',
+        component: () => import('@/views/TeacherPlan.vue'),
+        meta: { title: '班级计划', roles: ['teacher'] }
+      },
+      {
+        path: 'teacher/resource',
+        name: 'TeacherResource',
+        component: () => import('@/views/TeacherResource.vue'),
+        meta: { title: '班级资源', roles: ['teacher'] }
+      },
+      {
+        path: 'teacher/notes',
+        name: 'TeacherNotes',
+        component: () => import('@/views/TeacherNotes.vue'),
+        meta: { title: '班级笔记', roles: ['teacher'] }
+      },
+      {
+        path: 'teacher/ai',
+        name: 'TeacherAI',
+        component: () => import('@/views/TeacherAI.vue'),
+        meta: { title: 'AI分析助手', roles: ['teacher'] }
       }
     ]
   }
@@ -104,10 +135,8 @@ const routes = [
  * 根据用户角色获取默认跳转路由
  */
 function getDefaultRoute() {
-  const role = localStorage.getItem('userRole')
-  if (role === 'teacher') return '/teacher/dashboard'
-  if (role === 'admin') return '/admin/dashboard'
-  return '/dashboard'
+  // 统一跳转到资源页面
+  return '/resource'
 }
 
 const router = createRouter({
@@ -123,35 +152,23 @@ router.beforeEach((to, from, next) => {
   const userRole = localStorage.getItem('userRole')
   const isLoggedIn = !!token
 
-  // 访问公开页面（登录/注册）
+  // 公开页面（登录/注册）直接放行
   if (to.meta.public) {
-    if (isLoggedIn && to.path === '/login') {
-      next('/')
-      return
-    }
     next()
     return
   }
 
-  // 访问需要登录的页面
+  // 需要登录但未登录 → 去登录页
   if (!isLoggedIn) {
     next('/login')
     return
   }
 
-  // 角色权限校验：检查 meta.roles 是否限制了访问角色
-  if (to.meta.roles && to.meta.roles.length > 0) {
-    if (!to.meta.roles.includes(userRole)) {
-      // 角色不匹配，跳转到自己的首页
-      if (userRole === 'teacher') {
-        next('/teacher/dashboard')
-      } else if (userRole === 'admin') {
-        next('/admin/dashboard')
-      } else {
-        next('/dashboard')
-      }
-      return
-    }
+  // 已登录访问公开页面 → 重定向到首页（避免循环，只在访问 /login 时重定向）
+  if (to.path === '/login' || to.path === '/') {
+    // 统一跳转到资源页面
+    next('/resource')
+    return
   }
 
   next()

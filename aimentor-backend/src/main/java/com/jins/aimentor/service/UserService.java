@@ -50,4 +50,11 @@ public interface UserService extends IService<User> {
      * @return 是否验证通过
      */
     boolean verifyCode(String phone, String code);
+
+    /**
+     * 更新用户头像
+     * @param userId 用户ID
+     * @param avatar 头像URL
+     */
+    void updateAvatar(Long userId, String avatar);
 }

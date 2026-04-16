@@ -57,3 +57,32 @@ export const updateUserInfo = (data) => {
     data
   })
 }
+
+/**
+ * 上传头像
+ * @param {File} file 图片文件
+ */
+export const uploadAvatar = (file) => {
+  const formData = new FormData()
+  formData.append('file', file)
+  return request({
+    url: '/upload/avatar',
+    method: 'post',
+    data: formData,
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
+  })
+}
+
+/**
+ * 更新头像URL
+ * @param {string} avatar 头像URL
+ */
+export const updateAvatar = (avatar) => {
+  return request({
+    url: '/user/avatar',
+    method: 'put',
+    data: { avatar }
+  })
+}

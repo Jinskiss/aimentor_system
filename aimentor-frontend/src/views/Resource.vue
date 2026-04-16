@@ -1,10 +1,15 @@
 <template>
   <div class="resource-container">
-    <!-- 页面标题 -->
+    <!-- 页面头部 -->
     <div class="page-header">
       <div class="header-left">
-        <h2 class="page-title">学习资源库</h2>
-        <p class="page-subtitle">精选优质资源，助力高效学习</p>
+        <div class="header-icon-wrapper">
+          <el-icon class="header-icon"><Collection /></el-icon>
+        </div>
+        <div class="header-text">
+          <h2 class="page-title">学习资源</h2>
+          <p class="page-subtitle">精选优质资源，助力学习成长</p>
+        </div>
       </div>
       <div class="header-right">
         <el-button type="primary" @click="showAddDialog = true">
@@ -23,7 +28,7 @@
           </div>
           <div class="stat-info">
             <span class="stat-value">{{ resources.length }}</span>
-            <span class="stat-label">资源总数</span>
+            <span class="stat-label">总资源数</span>
           </div>
         </div>
       </el-col>
@@ -45,7 +50,7 @@
           </div>
           <div class="stat-info">
             <span class="stat-value">{{ docCount }}</span>
-            <span class="stat-label">文档资料</span>
+            <span class="stat-label">文档资源</span>
           </div>
         </div>
       </el-col>
@@ -62,7 +67,7 @@
       </el-col>
     </el-row>
 
-    <!-- 筛选区域 -->
+    <!-- 筛选卡片 -->
     <el-card class="filter-card">
       <div class="filter-row">
         <div class="filter-group">
@@ -74,7 +79,7 @@
             <el-radio-button label="英语" value="英语" />
             <el-radio-button label="物理" value="物理" />
             <el-radio-button label="化学" value="化学" />
-            <el-radio-button label="历史" value="历史" />
+            <el-radio-button label="生物" value="生物" />
           </el-radio-group>
         </div>
         <div class="filter-group">
@@ -83,23 +88,23 @@
             <el-radio-button label="全部" value="" />
             <el-radio-button label="视频" value="视频" />
             <el-radio-button label="文档" value="文档" />
-            <el-radio-button label="练习" value="练习" />
-            <el-radio-button label="音频" value="音频" />
+            <el-radio-button label="文章" value="文章" />
+            <el-radio-button label="其他" value="其他" />
           </el-radio-group>
         </div>
       </div>
     </el-card>
 
-    <!-- 排序和视图切换 -->
+    <!-- 工具栏 -->
     <div class="toolbar">
       <div class="toolbar-left">
-        <span class="result-count">共找到 <strong>{{ resources.length }}</strong> 个资源</span>
+        <span class="result-count">共 <strong>{{ resources.length }}</strong> 个资源</span>
       </div>
       <div class="toolbar-right">
         <el-select v-model="sortType" size="small" style="width: 120px; margin-right: 10px;">
-          <el-option label="综合排序" value="default" />
-          <el-option label="推荐指数" value="score" />
-          <el-option label="最新资源" value="time" />
+          <el-option label="默认排序" value="default" />
+          <el-option label="评分最高" value="score" />
+          <el-option label="最新添加" value="time" />
         </el-select>
         <el-radio-group v-model="viewMode" size="small">
           <el-radio-button label="grid">
@@ -117,7 +122,7 @@
       <el-skeleton :rows="6" animated />
     </div>
 
-    <!-- 网格视图资源列表 -->
+    <!-- 资源列表 -->
     <div v-else-if="resources.length > 0" :class="['resource-grid', viewMode]">
       <div
         v-for="(item, idx) in resources"
@@ -128,18 +133,36 @@
         @mouseleave="hoveredId = null"
       >
         <div class="card-image">
-          <div :class="['type-badge', item.type]">
+          <!-- 有封面图片时显示图片，失败时显示默认图标 -->
+          <img 
+            v-if="item.coverImage && !imageErrors[item.id]" 
+            :src="item.coverImage" 
+            class="cover-img" 
+            :alt="item.title"
+            @error="handleImageError(item.id)"
+          />
+          <!-- 没有封面图片或加载失败则显示类型图标 -->
+          <div v-else :class="['image-bg', item.type]">
+            <el-icon v-if="item.type === '视频'" class="bg-icon"><VideoPlay /></el-icon>
+            <el-icon v-else-if="item.type === '文档'" class="bg-icon"><Document /></el-icon>
+            <el-icon v-else-if="item.type === '文章'" class="bg-icon"><EditPen /></el-icon>
+            <el-icon v-else-if="item.type === 'exercise'" class="bg-icon"><Edit /></el-icon>
+            <el-icon v-else-if="item.type === 'audio'" class="bg-icon"><Microphone /></el-icon>
+            <el-icon v-else class="bg-icon"><Collection /></el-icon>
+            <span class="bg-text">{{ item.title?.charAt(0) || '资' }}</span>
+          </div>
+          <div class="type-badge">
             <el-icon v-if="item.type === '视频'"><VideoPlay /></el-icon>
             <el-icon v-else-if="item.type === '文档'"><Document /></el-icon>
-            <el-icon v-else-if="item.type === '练习'"><EditPen /></el-icon>
+            <el-icon v-else-if="item.type === '文章'"><EditPen /></el-icon>
             <el-icon v-else><Microphone /></el-icon>
             <span>{{ item.type }}</span>
           </div>
           <div v-if="item.recommendScore >= 90" class="hot-badge">
-            <el-icon><Star /></el-icon>精选
+            <el-icon><Star /></el-icon>热门
           </div>
           <div class="subject-overlay">
-            <el-tag size="small" type="info">{{ item.subject || '通用' }}</el-tag>
+            <el-tag size="small" type="info">{{ item.subject || '未分类' }}</el-tag>
           </div>
         </div>
 
@@ -150,7 +173,7 @@
           <div class="card-meta">
             <div class="meta-item">
               <el-icon><Star /></el-icon>
-              <span>推荐指数：{{ item.recommendScore || 0 }}</span>
+              <span>评分：{{ item.recommendScore || 0 }}</span>
             </div>
           </div>
         </div>
@@ -179,8 +202,8 @@
 
     <!-- 空状态 -->
     <div v-else class="empty-state">
-      <el-empty description="暂无资源，换个条件试试吧">
-        <el-button type="primary" @click="handleFilter">刷新资源</el-button>
+      <el-empty description="暂无学习资源">
+        <el-button type="primary" @click="handleFilter">刷新列表</el-button>
       </el-empty>
     </div>
 
@@ -194,8 +217,8 @@
           <el-select v-model="addForm.type" placeholder="请选择类型" style="width: 100%">
             <el-option label="视频" value="视频" />
             <el-option label="文档" value="文档" />
-            <el-option label="练习" value="练习" />
-            <el-option label="音频" value="音频" />
+            <el-option label="文章" value="文章" />
+            <el-option label="其他" value="其他" />
           </el-select>
         </el-form-item>
         <el-form-item label="所属科目" prop="subject">
@@ -205,14 +228,14 @@
             <el-option label="英语" value="英语" />
             <el-option label="物理" value="物理" />
             <el-option label="化学" value="化学" />
-            <el-option label="历史" value="历史" />
-            <el-option label="通用" value="通用" />
+            <el-option label="生物" value="生物" />
+            <el-option label="其他" value="其他" />
           </el-select>
         </el-form-item>
         <el-form-item label="资源链接" prop="url">
           <el-input
             v-model="addForm.url"
-            placeholder="B站请填稿件页链接，如 https://www.bilibili.com/video/BV…；其他填完整 https 链接"
+            placeholder="支持B站视频或https链接，例如 https://www.bilibili.com/video/BV..."
           />
         </el-form-item>
         <el-form-item label="资源描述">
@@ -221,7 +244,7 @@
       </el-form>
       <template #footer>
         <el-button @click="showAddDialog = false">取消</el-button>
-        <el-button type="primary" @click="handleAdd">确认添加</el-button>
+        <el-button type="primary" @click="handleAdd">添加资源</el-button>
       </template>
     </el-dialog>
   </div>
@@ -234,7 +257,7 @@ import { getRecommendResources, getResourcesBySubject, getResourcesByType } from
 import { ElMessage } from 'element-plus'
 import {
   Plus, Collection, VideoPlay, Document, Star, Grid, List,
-  View, EditPen, Microphone
+  View, EditPen, Microphone, Edit
 } from '@element-plus/icons-vue'
 
 const router = useRouter()
@@ -248,6 +271,7 @@ const hoveredId = ref(null)
 const showAddDialog = ref(false)
 const addFormRef = ref(null)
 const favoriteIds = ref([])
+const imageErrors = ref({})
 
 const addForm = ref({
   title: '',
@@ -268,6 +292,12 @@ const docCount = computed(() => resources.value.filter(r => r.type === '文档')
 const favoriteCount = computed(() => favoriteIds.value.length)
 
 const isFavorited = (id) => favoriteIds.value.includes(id)
+
+/** 图片加载失败时隐藏图片，显示默认图标 */
+const handleImageError = (id) => {
+  imageErrors.value[id] = true
+  console.warn('[Resource] 图片加载失败，id=', id)
+}
 
 const loadResources = async () => {
   loading.value = true
@@ -304,10 +334,11 @@ const handleFilter = async () => {
   }
 }
 
-/** 进入站内资源详情页；在详情页可打开外链或复制链接 */
+/** 跳转到资源详情页 */
 const openResource = (item) => {
   if (!item?.id) return
-  router.push({ name: 'ResourceDetail', params: { id: String(item.id) } })
+  // 始终跳转到详情页，详情页会根据链接类型决定如何展示
+  router.push({ path: `/resource/${item.id}` })
 }
 
 const toggleFavorite = (item) => {
@@ -317,7 +348,7 @@ const toggleFavorite = (item) => {
     ElMessage.success('已取消收藏')
   } else {
     favoriteIds.value.push(id)
-    ElMessage.success(`已收藏：「${item.title}」`)
+    ElMessage.success(`已收藏：${item.title}`)
   }
 }
 
@@ -327,7 +358,7 @@ const handleAdd = async () => {
   } catch {
     return
   }
-  ElMessage.success('资源添加成功（后端接口待开发）')
+  ElMessage.success('资源添加成功')
   showAddDialog.value = false
 }
 
@@ -341,16 +372,42 @@ onMounted(() => {
   padding: 10px;
 }
 
-/* 页面标题 */
+/* 页面头部 */
 .page-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
   padding: 20px 24px;
-  background: linear-gradient(135deg, #67C23A, #85ce61);
+  background: linear-gradient(135deg, #ff6633, #ff8855);
   border-radius: 16px;
   color: #fff;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.header-icon-wrapper {
+  width: 56px;
+  height: 56px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.header-icon {
+  font-size: 28px;
+  color: #fff;
+}
+
+.header-text {
+  display: flex;
+  flex-direction: column;
 }
 
 .page-title {
@@ -365,7 +422,7 @@ onMounted(() => {
   opacity: 0.9;
 }
 
-/* 统计卡片行 */
+/* 统计卡片 */
 .stats-row {
   margin-bottom: 20px;
 }
@@ -396,8 +453,8 @@ onMounted(() => {
   font-size: 28px;
 }
 
-.stat-icon.gradient-blue { background: linear-gradient(135deg, #409EFF, #66b1ff); color: #fff; }
-.stat-icon.gradient-green { background: linear-gradient(135deg, #67C23A, #85ce61); color: #fff; }
+.stat-icon.gradient-blue { background: linear-gradient(135deg, #ff6633, #ff8855); color: #fff; }
+.stat-icon.gradient-green { background: linear-gradient(135deg, #ff6633, #ff8855); color: #fff; }
 .stat-icon.gradient-orange { background: linear-gradient(135deg, #909CF0, #A8B4F5); color: #fff; }
 .stat-icon.gradient-purple { background: linear-gradient(135deg, #9370DB, #ba8fdb); color: #fff; }
 
@@ -465,7 +522,7 @@ onMounted(() => {
 }
 
 .result-count strong {
-  color: #409EFF;
+  color: #ff6633;
   font-size: 16px;
 }
 
@@ -479,14 +536,14 @@ onMounted(() => {
   padding: 20px 0;
 }
 
-/* 网格视图 */
+/* 资源网格 */
 .resource-grid.grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 20px;
 }
 
-/* 列表视图 */
+/* 资源列表 */
 .resource-grid.list {
   display: flex;
   flex-direction: column;
@@ -547,14 +604,60 @@ onMounted(() => {
   border: 2px solid #E6A23C;
 }
 
-/* 卡片图片区域 */
+/* 卡片图片区 */
 .card-image {
   height: 140px;
-  background: linear-gradient(135deg, #f5f7fa 0%, #e4e7ed 100%);
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
+}
+
+.cover-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.image-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.image-bg.视频 {
+  background: linear-gradient(135deg, #ff6633 0%, #ff8855 100%);
+}
+
+.image-bg.文档 {
+  background: linear-gradient(135deg, #909CF0 0%, #A8B4F5 100%);
+}
+
+.image-bg.文章 {
+  background: linear-gradient(135deg, #E6A23C 0%, #F5D78E 100%);
+}
+
+.image-bg.其他 {
+  background: linear-gradient(135deg, #909399 0%, #C0C4CC 100%);
+}
+
+.bg-icon {
+  font-size: 36px;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.bg-text {
+  font-size: 28px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.9);
 }
 
 .type-badge {
@@ -568,14 +671,15 @@ onMounted(() => {
   border-radius: 20px;
   font-size: 12px;
   font-weight: 500;
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(0, 0, 0, 0.4);
   backdrop-filter: blur(4px);
+  color: #fff;
 }
 
-.type-badge.视频 { color: #409EFF; }
-.type-badge.文档 { color: #67C23A; }
-.type-badge.练习 { color: #E6A23C; }
-.type-badge.音频 { color: #909399; }
+.type-badge.视频 { background: rgba(255, 102, 51, 0.85); }
+.type-badge.文档 { background: rgba(144, 156, 240, 0.85); }
+.type-badge.文章 { background: rgba(230, 162, 60, 0.85); }
+.type-badge.其他 { background: rgba(144, 147, 153, 0.85); }
 
 .hot-badge {
   position: absolute;

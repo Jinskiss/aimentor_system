@@ -23,6 +23,16 @@ spring:
           max-idle: 8
           max-wait: -1ms
       connect-timeout: 30000ms
+  # 文件上传配置
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 10MB
+
+# 上传配置
+upload:
+  path: uploads
+  base-url: http://localhost:8091
 
 mybatis-plus:
   configuration:
