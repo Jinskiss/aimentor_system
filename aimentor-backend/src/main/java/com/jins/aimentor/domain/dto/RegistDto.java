@@ -56,4 +56,9 @@ public class RegistDto implements Serializable {
      */
     private String code;
 
+    /**
+     * 头像URL
+     */
+    private String avatar;
+
 }

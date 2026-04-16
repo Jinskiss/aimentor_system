@@ -80,7 +80,15 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         user.setEmail(registForm.getEmail());
         user.setPhone(registForm.getPhone());
         user.setRole(registForm.getRole());
+        // 保存头像URL（如果有）
+        log.info("注册时接收到的avatar值: {}", registForm.getAvatar());
+        if (StringUtils.hasText(registForm.getAvatar())) {
+            user.setAvatar(registForm.getAvatar());
+            log.info("注册时设置了头像: {}", registForm.getAvatar());
+        }
         save(user);
+
+        log.info("保存用户后的avatar字段: {}", user.getAvatar());
 
         // 清除已使用的验证码
         CODE_STORE.remove(registForm.getPhone());

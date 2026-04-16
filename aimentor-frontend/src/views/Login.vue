@@ -120,7 +120,7 @@ const handleLogin = async () => {
 
 .login-left {
   flex: 1;
-  background: linear-gradient(135deg, #ff6633 0%, #ff8855 50%, #8cc5ff 100%);
+  background: linear-gradient(135deg, var(--theme-color) 0%, var(--theme-color-end, #ff8855) 50%, #8cc5ff 100%);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -221,15 +221,15 @@ const handleLogin = async () => {
   font-size: 16px;
   font-weight: 600;
   border-radius: 8px;
-  background: linear-gradient(135deg, #ff6633, #ff8855) !important;
+  background: var(--theme-color-gradient) !important;
   border: none;
   letter-spacing: 4px;
 }
 
 .login-btn:hover {
-  background: linear-gradient(135deg, #ff8855, #ff6633) !important;
+  background: linear-gradient(135deg, var(--theme-color-end, #ff8855), var(--theme-color)) !important;
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(255, 102, 51, 0.4);
+  box-shadow: 0 8px 20px var(--theme-color-light);
 }
 
 .login-footer {
@@ -238,7 +238,7 @@ const handleLogin = async () => {
 }
 
 .login-footer a {
-  color: #ff6633;
+  color: var(--theme-color);
   font-size: 14px;
   text-decoration: none;
 }

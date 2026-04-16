@@ -213,6 +213,7 @@ import { getScoreTrend, getWeakPoints, getKnowledgeMasteries } from '@/api/acade
 import { getMyPlans } from '@/api/plan'
 import { ElMessage } from 'element-plus'
 import { useUserStore } from '@/stores/user'
+import { useThemeStore } from '@/stores/theme'
 import {
   DataLine,
   Star,
@@ -240,6 +241,7 @@ const totalScore = ref(0)
 const examCount = ref(0)
 const masteryCount = ref(0)
 const completedPlans = ref(0)
+const themeStore = useThemeStore()
 let trendChart = null
 let weakChart = null
 let radarChart = null
@@ -264,7 +266,7 @@ const getMasteryType = (mastery) => {
 const getMasteryColor = (mastery) => {
   if (mastery < 30) return '#B4A0F0'
   if (mastery < 60) return '#909CF0'
-  return '#ff6633'
+  return 'var(--theme-color)'
 }
 
 const getMasteryLabel = (mastery) => {
@@ -282,6 +284,8 @@ const initTrendChart = (data) => {
   }
 
   trendChart = echarts.init(trendChartRef.value)
+  const themeColor = themeStore.themeColor
+  const themeColorLight = themeColor + '0d'
 
   const option = {
     title: { text: '成绩趋势', left: 'center', top: 10 },
@@ -306,12 +310,12 @@ const initTrendChart = (data) => {
       smooth: true,
       symbol: 'circle',
       symbolSize: 8,
-      lineStyle: { color: '#ff6633', width: 3 },
-      itemStyle: { color: '#ff6633', borderWidth: 2, borderColor: '#fff' },
+      lineStyle: { color: themeColor, width: 3 },
+      itemStyle: { color: themeColor, borderWidth: 2, borderColor: '#fff' },
       areaStyle: {
         color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-          { offset: 0, color: 'rgba(255, 102, 51, 0.3)' },
-          { offset: 1, color: 'rgba(255, 102, 51, 0.05)' }
+          { offset: 0, color: themeColor + '33' },
+          { offset: 1, color: themeColorLight }
         ])
       }
     }]
@@ -332,7 +336,7 @@ const initWeakChart = (data) => {
 
   const barData = data.map(item => ({
     value: item.mastery,
-    itemStyle: { color: item.mastery < 60 ? '#909CF0' : '#ff6633' }
+    itemStyle: { color: item.mastery < 60 ? '#909CF0' : 'var(--theme-color)' }
   }))
 
   const option = {
@@ -431,8 +435,8 @@ const initPieChart = (data) => {
       },
       labelLine: { show: false },
       data: [
-        { value: excellent, name: '优秀(>=80)', itemStyle: { color: '#ff6633' } },
-        { value: good, name: '良好(60-80)', itemStyle: { color: '#ff6633' } },
+        { value: excellent, name: '优秀(>=80)', itemStyle: { color: 'var(--theme-color)' } },
+        { value: good, name: '良好(60-80)', itemStyle: { color: 'var(--theme-color)' } },
         { value: fair, name: '一般(30-60)', itemStyle: { color: '#909CF0' } },
         { value: poor, name: '薄弱(<30)', itemStyle: { color: '#B4A0F0' } }
       ]
@@ -531,7 +535,7 @@ onUnmounted(() => {
   align-items: center;
   margin-bottom: 20px;
   padding: 20px 24px;
-  background: linear-gradient(135deg, #ff6633, #ff8855);
+  background: var(--theme-color-gradient);
   border-radius: 16px;
   color: #fff;
 }
@@ -562,9 +566,9 @@ onUnmounted(() => {
   border-radius: 12px;
 }
 
-.stat-icon.blue { background: rgba(255, 102, 51, 0.2); color: #ff6633; }
+.stat-icon.blue { background: var(--theme-color-light); color: var(--theme-color); }
 .stat-icon.orange { background: rgba(144, 156, 240, 0.2); color: #909CF0; }
-.stat-icon.green { background: rgba(255, 102, 51, 0.2); color: #ff6633; }
+.stat-icon.green { background: var(--theme-color-light); color: var(--theme-color); }
 .stat-icon.purple { background: rgba(147, 112, 219, 0.2); color: #9370DB; }
 
 .stats-row {
@@ -599,10 +603,10 @@ onUnmounted(() => {
   font-size: 24px;
 }
 
-.stat-icon.gradient-blue { background: linear-gradient(135deg, #ff6633, #ff8855); color: #fff; }
-.stat-icon.gradient-green { background: linear-gradient(135deg, #ff6633, #ff8855); color: #fff; }
-.stat-icon.gradient-orange { background: linear-gradient(135deg, #909CF0, #A8B4F5); color: #fff; }
-.stat-icon.gradient-purple { background: linear-gradient(135deg, #9370DB, #ba8fdb); color: #fff; }
+.stat-icon.gradient-blue { background: var(--theme-color-gradient); color: #fff; }
+.stat-icon.gradient-green { background: var(--theme-color-gradient); color: #fff; }
+.stat-icon.gradient-orange { background: var(--theme-color-gradient); color: #fff; }
+.stat-icon.gradient-purple { background: var(--theme-color-gradient); color: #fff; }
 
 .stat-info {
   display: flex;
@@ -629,11 +633,11 @@ onUnmounted(() => {
   align-items: center;
   gap: 4px;
   font-size: 12px;
-  color: #ff6633;
+  color: var(--theme-color);
 }
 
 .stat-trend.up {
-  color: #ff6633;
+  color: var(--theme-color);
 }
 
 .chart-card, .weak-card {
@@ -675,9 +679,9 @@ onUnmounted(() => {
 }
 
 .card-icon.orange { background: rgba(144, 156, 240, 0.1); color: #909CF0; }
-.card-icon.blue { background: rgba(255, 102, 51, 0.1); color: #ff6633; }
+.card-icon.blue { background: var(--theme-color-light); color: var(--theme-color); }
 .card-icon.purple { background: rgba(147, 112, 219, 0.1); color: #9370DB; }
-.card-icon.green { background: rgba(255, 102, 51, 0.1); color: #ff6633; }
+.card-icon.green { background: var(--theme-color-light); color: var(--theme-color); }
 .card-icon.red { background: rgba(180, 160, 240, 0.1); color: #B4A0F0; }
 
 .loading-container, .empty-container {
@@ -702,7 +706,7 @@ onUnmounted(() => {
 
 .empty-icon {
   font-size: 64px;
-  color: #ff6633;
+  color: var(--theme-color);
   margin-bottom: 16px;
 }
 
@@ -734,7 +738,7 @@ onUnmounted(() => {
 .weak-point-item:hover {
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
   transform: translateY(-4px);
-  border-color: #ff6633;
+  border-color: var(--theme-color);
 }
 
 .weak-header {
@@ -747,7 +751,7 @@ onUnmounted(() => {
 .weak-index {
   width: 24px;
   height: 24px;
-  background: linear-gradient(135deg, #ff6633, #ff8855);
+  background: var(--theme-color-gradient);
   color: #fff;
   border-radius: 50%;
   display: flex;

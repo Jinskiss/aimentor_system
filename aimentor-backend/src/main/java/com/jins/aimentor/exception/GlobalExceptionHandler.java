@@ -13,6 +13,7 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.util.stream.Collectors;
 
@@ -106,6 +107,15 @@ public class GlobalExceptionHandler {
     public Result<Void> handleBiz(BizException e) {
         log.warn("[GlobalException] BizException code={}, msg={}", e.getCode(), e.getMessage());
         return Result.error(e.getCode(), e.getMessage());
+    }
+
+    /**
+     * 处理静态资源未找到异常（如 /uploads/xxx）
+     */
+    @ExceptionHandler(NoResourceFoundException.class)
+    public Result<Void> handleNoResourceFound(NoResourceFoundException e) {
+        log.warn("[GlobalException] NoResourceFound: {}", e.getMessage());
+        return Result.error(Status.CODE_404, "资源不存在");
     }
 
     /**

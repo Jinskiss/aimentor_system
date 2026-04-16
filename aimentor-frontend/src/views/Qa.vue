@@ -35,7 +35,7 @@
 
       <div v-if="messages.length === 0" class="welcome-area">
         <div class="welcome-icon">
-          <el-icon :size="56" color="#ff6633"><ChatDotRound /></el-icon>
+          <el-icon :size="56" style="color: var(--theme-color);"><ChatDotRound /></el-icon>
         </div>
         <h3 class="welcome-title">你好，我是 AI 学习助手</h3>
         <p class="welcome-desc">
@@ -88,8 +88,8 @@
           :class="['message-row', msg.role]"
         >
           <div :class="['avatar', msg.role]">
-            <el-avatar v-if="msg.role === 'ai'" :size="36" style="background: linear-gradient(135deg, #ff6633, #ff8855);">AI</el-avatar>
-            <el-avatar v-else :size="36" style="background: #ff6633;">我</el-avatar>
+            <el-avatar v-if="msg.role === 'ai'" :size="36" style="background: var(--theme-color-gradient);">AI</el-avatar>
+            <el-avatar v-else :size="36" style="background: var(--theme-color);">我</el-avatar>
           </div>
 
           <div :class="['bubble-wrap', msg.role]">
@@ -123,7 +123,7 @@
 
         <div v-if="aiTyping" class="message-row ai">
           <div class="avatar ai">
-            <el-avatar :size="36" style="background: linear-gradient(135deg, #ff6633, #ff8855);">AI</el-avatar>
+            <el-avatar :size="36" style="background: var(--theme-color-gradient);">AI</el-avatar>
           </div>
           <div class="bubble-wrap ai">
             <div class="bubble-header">
@@ -416,7 +416,7 @@ onMounted(() => {
   align-items: center;
   justify-content: space-between;
   padding: 8px 16px;
-  background: linear-gradient(135deg, #ff6633, #ff8855);
+  background: var(--theme-color-gradient);
   border-radius: 12px;
   color: #fff;
 }
@@ -464,7 +464,7 @@ onMounted(() => {
 .status-dot {
   width: 8px;
   height: 8px;
-  background: #ff6633;
+  background: var(--theme-color);
   border-radius: 50%;
   animation: pulse 2s infinite;
 }
@@ -514,7 +514,7 @@ onMounted(() => {
   width: 100px;
   height: 100px;
   border-radius: 50%;
-  background: linear-gradient(135deg, rgba(255, 102, 51, 0.1), rgba(102, 177, 255, 0.1));
+  background: linear-gradient(135deg, var(--theme-color-light), rgba(102, 177, 255, 0.1));
   display: flex;
   align-items: center;
   justify-content: center;
@@ -563,8 +563,8 @@ onMounted(() => {
 
 .quick-tag:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(255, 102, 51, 0.3);
-  background: linear-gradient(135deg, #ff6633, #ff8855) !important;
+  box-shadow: 0 4px 12px var(--theme-color-light);
+  background: var(--theme-color-gradient) !important;
   color: #fff !important;
   border-color: transparent !important;
 }
@@ -666,18 +666,18 @@ onMounted(() => {
 }
 
 .user-content {
-  background: linear-gradient(135deg, #ff6633, #ff8855);
+  background: var(--theme-color-gradient);
   color: #fff;
   padding: 12px 16px;
   border-radius: 16px 16px 4px 16px;
   font-size: 14px;
   line-height: 1.6;
   word-break: break-word;
-  box-shadow: 0 2px 8px rgba(255, 102, 51, 0.3);
+  box-shadow: 0 2px 8px var(--theme-color-light);
 }
 
 .bubble-wrap.ai .user-content {
-  background: linear-gradient(135deg, #ff6633, #ff8855);
+  background: var(--theme-color-gradient);
   border-radius: 16px 16px 16px 4px;
 }
 
@@ -702,8 +702,8 @@ onMounted(() => {
 .markdown-body :deep(p) { margin: 8px 0; }
 
 .markdown-body :deep(code.inline-code) {
-  background: #fff3e0;
-  color: #ff6633;
+  background: var(--theme-color-light);
+  color: var(--theme-color);
   padding: 2px 6px;
   border-radius: 4px;
   font-family: 'Courier New', monospace;
@@ -752,7 +752,7 @@ onMounted(() => {
 }
 
 .message-actions .el-button:hover {
-  color: #ff6633;
+  color: var(--theme-color);
 }
 
 .error-tip {
@@ -781,7 +781,7 @@ onMounted(() => {
 .typing-indicator span {
   width: 8px;
   height: 8px;
-  background: linear-gradient(135deg, #ff6633, #ff8855);
+  background: var(--theme-color-gradient);
   border-radius: 50%;
   animation: typing-bounce 1.4s infinite ease-in-out both;
 }
@@ -817,8 +817,8 @@ onMounted(() => {
 }
 
 .input-wrapper :deep(.el-textarea__inner:focus) {
-  border-color: #ff6633;
-  box-shadow: 0 0 0 3px rgba(255, 102, 51, 0.1);
+  border-color: var(--theme-color);
+  box-shadow: 0 0 0 3px var(--theme-color-light);
 }
 
 .input-actions {
@@ -842,7 +842,7 @@ onMounted(() => {
 }
 
 .send-btn {
-  background: linear-gradient(135deg, #ff6633, #ff8855) !important;
+  background: var(--theme-color-gradient) !important;
   border: none !important;
   min-width: 100px;
   font-weight: 500;
@@ -850,7 +850,7 @@ onMounted(() => {
 
 .send-btn:hover {
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(255, 102, 51, 0.4);
+  box-shadow: 0 4px 12px var(--theme-color-light);
 }
 
 @keyframes fadeIn {

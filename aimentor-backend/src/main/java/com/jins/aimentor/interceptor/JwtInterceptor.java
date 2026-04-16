@@ -41,6 +41,14 @@ public class JwtInterceptor implements HandlerInterceptor {
         if (!(handler instanceof HandlerMethod)) {
             return true;
         }
+
+        // 获取请求路径
+        String path = request.getRequestURI();
+        // 头像上传接口允许未登录访问（注册时需要）
+        if (path.startsWith("/api/upload/avatar")) {
+            return true;
+        }
+
         //验证是否有token
         if (!StringUtils.hasLength(token)) {
             throw new BizException(Status.TOKEN_ERROR, "token失效,请重新登陆");

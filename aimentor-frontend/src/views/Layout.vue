@@ -25,7 +25,7 @@
         :collapse-transition="false"
         background-color="#1a1a2e"
         text-color="#a0a0b0"
-        active-text-color="#ff6633"
+        active-text-color="var(--theme-color)"
       >
         <!-- ===== 学生菜单 ===== -->
         <template v-if="currentRole === 'student'">
@@ -144,7 +144,7 @@
                     :class="['notif-item', { unread: !item.read }]"
                     @click="handleNotifClick(item)"
                   >
-                    <el-icon :color="item.type === 'success' ? '#ff6633' : '#ff6633'" class="notif-icon">
+                    <el-icon class="notif-icon">
                       <component :is="item.icon" />
                     </el-icon>
                     <div class="notif-body">
@@ -162,7 +162,7 @@
           <div class="user-info">
             <el-dropdown trigger="click" @command="handleCommand">
               <div class="user-avatar">
-                <el-avatar :size="36" :style="{ backgroundColor: '#ff6633' }">
+                <el-avatar :size="36" :src="userStore.userInfo?.avatar" :style="{ backgroundColor: 'var(--theme-color)' }">
                   {{ (userStore.username || '同学').charAt(0).toUpperCase() }}
                 </el-avatar>
                 <div class="user-detail">
@@ -320,20 +320,20 @@ const handleLogout = () => {
 .aside { background: linear-gradient(180deg, #304156 0%, #1a1a2e 100%); display: flex; flex-direction: column; transition: width 0.3s; box-shadow: 2px 0 10px rgba(0,0,0,0.2); }
 .logo { height: 70px; display: flex; align-items: center; justify-content: center; gap: 10px; padding: 0 15px; border-bottom: 1px solid rgba(255,255,255,0.1); transition: all 0.3s; }
 .logo-collapse { padding: 0; justify-content: center; }
-.logo-icon { color: #ff6633; display: flex; align-items: center; animation: float 3s ease-in-out infinite; }
+.logo-icon { color: var(--theme-color); display: flex; align-items: center; animation: float 3s ease-in-out infinite; }
 .logo-text { margin: 0; font-size: 18px; font-weight: 600; color: #fff; white-space: nowrap; }
 .el-menu-vertical { flex: 1; border-right: none; }
 .el-menu-vertical:not(.el-menu--collapse) { width: 220px; }
 :deep(.el-menu-item) { height: 50px; line-height: 50px; margin: 4px 12px; border-radius: 8px; transition: all 0.3s; font-size: 14px; }
-:deep(.el-menu-item:hover) { background: rgba(255, 102, 51, 0.15) !important; color: #ff6633 !important; }
-:deep(.el-menu-item.is-active) { background: linear-gradient(90deg, rgba(255, 102, 51, 0.3), rgba(255, 102, 51, 0.1)) !important; color: #fff !important; font-weight: 600; }
-:deep(.el-menu-item.is-active)::before { content: ''; position: absolute; left: 0; top: 50%; transform: translateY(-50%); width: 4px; height: 24px; background: #ff6633; border-radius: 0 4px 4px 0; }
+:deep(.el-menu-item:hover) { background: var(--theme-color-light) !important; color: var(--theme-color) !important; }
+:deep(.el-menu-item.is-active) { background: linear-gradient(90deg, var(--theme-color-lighter), var(--theme-color-light)) !important; color: #fff !important; font-weight: 600; }
+:deep(.el-menu-item.is-active)::before { content: ''; position: absolute; left: 0; top: 50%; transform: translateY(-50%); width: 4px; height: 24px; background: var(--theme-color); border-radius: 0 4px 4px 0; }
 :deep(.el-menu-item .el-icon) { font-size: 18px; margin-right: 8px; }
 .collapse-btn { padding: 15px; text-align: center; color: #666; cursor: pointer; border-top: 1px solid rgba(255,255,255,0.1); transition: all 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 13px; }
-.collapse-btn:hover { color: #ff6633; background: rgba(255,255,255,0.05); }
+.collapse-btn:hover { color: var(--theme-color); background: rgba(255,255,255,0.05); }
 .header { background: #fff; box-shadow: 0 1px 4px rgba(0,21,41,0.08); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; height: 60px !important; }
 .header-left { display: flex; align-items: center; }
-.breadcrumb { padding-left: 10px; border-left: 3px solid #ff6633; }
+.breadcrumb { padding-left: 10px; border-left: 3px solid var(--theme-color); }
 .header-right { display: flex; align-items: center; gap: 20px; }
 .header-action { cursor: pointer; padding: 8px; border-radius: 8px; transition: all 0.3s; }
 .header-action:hover { background: #f5f7fa; }
@@ -356,10 +356,10 @@ const handleLogout = () => {
 .notif-item:hover { background: #f5f7fa; }
 .notif-item.unread { background: #ecf5ff; }
 .notif-item.unread:hover { background: #e6effe; }
-.notif-icon { margin-top: 2px; font-size: 18px; flex-shrink: 0; }
+.notif-icon { margin-top: 2px; font-size: 18px; flex-shrink: 0; color: var(--theme-color); }
 .notif-body { flex: 1; min-width: 0; }
 .notif-text { margin: 0 0 4px 0; font-size: 13px; color: #303133; line-height: 1.4; }
 .notif-time { font-size: 11px; color: #909399; }
-.notif-dot { width: 7px; height: 7px; background: #ff6633; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
+.notif-dot { width: 7px; height: 7px; background: var(--theme-color); border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
 @media (max-width: 768px) { .user-detail, .breadcrumb { display: none; } }
 </style>

@@ -379,7 +379,7 @@ onMounted(() => {
   align-items: center;
   margin-bottom: 20px;
   padding: 20px 24px;
-  background: linear-gradient(135deg, #ff6633, #ff8855);
+  background: var(--theme-color-gradient);
   border-radius: 16px;
   color: #fff;
 }
@@ -453,8 +453,8 @@ onMounted(() => {
   font-size: 28px;
 }
 
-.stat-icon.gradient-blue { background: linear-gradient(135deg, #ff6633, #ff8855); color: #fff; }
-.stat-icon.gradient-green { background: linear-gradient(135deg, #ff6633, #ff8855); color: #fff; }
+.stat-icon.gradient-blue { background: var(--theme-color-gradient); color: #fff; }
+.stat-icon.gradient-green { background: var(--theme-color-gradient); color: #fff; }
 .stat-icon.gradient-orange { background: linear-gradient(135deg, #909CF0, #A8B4F5); color: #fff; }
 .stat-icon.gradient-purple { background: linear-gradient(135deg, #9370DB, #ba8fdb); color: #fff; }
 
@@ -522,7 +522,7 @@ onMounted(() => {
 }
 
 .result-count strong {
-  color: #ff6633;
+  color: var(--theme-color);
   font-size: 16px;
 }
 
@@ -634,7 +634,7 @@ onMounted(() => {
 }
 
 .image-bg.视频 {
-  background: linear-gradient(135deg, #ff6633 0%, #ff8855 100%);
+  background: linear-gradient(135deg, var(--theme-color) 0%, var(--theme-color-end, #ff8855) 100%);
 }
 
 .image-bg.文档 {
@@ -676,7 +676,7 @@ onMounted(() => {
   color: #fff;
 }
 
-.type-badge.视频 { background: rgba(255, 102, 51, 0.85); }
+.type-badge.视频 { background: var(--theme-color-light); }
 .type-badge.文档 { background: rgba(144, 156, 240, 0.85); }
 .type-badge.文章 { background: rgba(230, 162, 60, 0.85); }
 .type-badge.其他 { background: rgba(144, 147, 153, 0.85); }
@@ -692,7 +692,7 @@ onMounted(() => {
   border-radius: 20px;
   font-size: 12px;
   font-weight: 500;
-  background: linear-gradient(135deg, #ff6633, #ff8855);
+  background: var(--theme-color-gradient);
   color: #fff;
 }
 
@@ -755,13 +755,13 @@ onMounted(() => {
 }
 
 .primary-btn {
-  background: linear-gradient(135deg, #ff6633, #ff8855) !important;
+  background: var(--theme-color-gradient) !important;
   border: none !important;
 }
 
 .primary-btn:hover {
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(255, 102, 51, 0.4);
+  box-shadow: 0 4px 12px var(--theme-color-light);
 }
 
 /* 空状态 */

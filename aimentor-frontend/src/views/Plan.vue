@@ -205,7 +205,7 @@
             </div>
             <el-progress
               :percentage="plan.progress || 0"
-              :color="plan.progress >= 100 ? '#67C23A' : '#ff6633'"
+              :color="plan.progress >= 100 ? '#67C23A' : 'var(--theme-color)'"
               :stroke-width="8"
               :show-text="false"
             />
@@ -330,7 +330,7 @@
           </div>
           <el-progress
             :percentage="currentPlan.progress || 0"
-            :color="currentPlan.progress >= 100 ? '#67C23A' : '#ff6633'"
+            :color="currentPlan.progress >= 100 ? '#67C23A' : 'var(--theme-color)'"
             :stroke-width="12"
           />
         </div>
@@ -604,7 +604,7 @@ onMounted(() => {
   align-items: center;
   margin-bottom: 20px;
   padding: 20px 24px;
-  background: linear-gradient(135deg, #ff6633, #ff8855);
+  background: var(--theme-color-gradient);
   border-radius: 16px;
   color: #fff;
 }
@@ -623,7 +623,7 @@ onMounted(() => {
 
 .generate-btn {
   background: #fff !important;
-  color: #ff6633 !important;
+  color: var(--theme-color) !important;
   border: none !important;
   font-weight: 600;
 }
@@ -662,7 +662,7 @@ onMounted(() => {
   font-size: 28px;
 }
 
-.stat-icon.gradient-blue { background: linear-gradient(135deg, #ff6633, #ff8855); color: #fff; }
+.stat-icon.gradient-blue { background: var(--theme-color-gradient); color: #fff; }
 .stat-icon.gradient-green { background: linear-gradient(135deg, #67C23A, #85ce61); color: #fff; }
 .stat-icon.gradient-orange { background: linear-gradient(135deg, #909CF0, #A8B4F5); color: #fff; }
 .stat-icon.gradient-purple { background: linear-gradient(135deg, #9370DB, #ba8fdb); color: #fff; }
@@ -730,7 +730,7 @@ onMounted(() => {
   font-size: 20px;
 }
 
-.card-icon.blue { color: #ff6633; }
+.card-icon.blue { color: var(--theme-color); }
 .card-icon.orange { color: #909CF0; }
 
 .calendar-nav {
@@ -781,7 +781,7 @@ onMounted(() => {
 }
 
 .gantt-day.today {
-  background: rgba(255, 102, 51, 0.1);
+  background: var(--theme-color-light);
 }
 
 .day-name {
@@ -823,7 +823,7 @@ onMounted(() => {
 }
 
 .gantt-bar.in-progress {
-  background: linear-gradient(135deg, #ff6633, #ff8855);
+  background: var(--theme-color-gradient);
 }
 
 .gantt-bar.completed {
@@ -885,7 +885,7 @@ onMounted(() => {
   background: #f5f7fa;
   border-radius: 12px;
   padding: 16px 20px;
-  border-left: 4px solid #ff6633;
+  border-left: 4px solid var(--theme-color);
   transition: all 0.3s;
 }
 

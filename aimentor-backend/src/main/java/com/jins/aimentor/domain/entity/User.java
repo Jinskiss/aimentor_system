@@ -71,6 +71,7 @@ public class User {
     /**
      * 用户头像URL
      */
+    @TableField("avatar")
     private String avatar;
 
     /**

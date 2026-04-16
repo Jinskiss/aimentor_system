@@ -108,8 +108,10 @@ const beforeAvatarUpload = (file) => {
 const handleAvatarUpload = async ({ file }) => {
   try {
     const res = await uploadAvatar(file)
+    console.log('头像上传响应:', res)
     if (res.code === 200 || res.code === '200') {
       avatarUrl.value = res.data
+      console.log('头像URL已设置:', avatarUrl.value)
       ElMessage.success('头像上传成功')
     } else {
       ElMessage.error(res.msg || '头像上传失败')
@@ -176,7 +178,9 @@ const handleRegister = async () => {
     const registerData = { ...form.value }
     if (avatarUrl.value) {
       registerData.avatar = avatarUrl.value
+      console.log('注册表单包含头像:', registerData.avatar)
     }
+    console.log('提交注册数据:', registerData)
     const res = await userStore.register(registerData)
     if (res.code === 200 || res.code === '200') {
       ElMessage.success('注册成功')

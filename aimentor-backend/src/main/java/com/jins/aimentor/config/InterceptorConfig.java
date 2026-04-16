@@ -19,13 +19,14 @@ public class InterceptorConfig implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        //jwt拦截器
+        //jwt拦截器 - 拦截所有请求，排除登录/注册/上传等接口
         registry.addInterceptor(jwtInterceptor)
                 .addPathPatterns("/**")
                 .excludePathPatterns(
                         "/api/user/login",
                         "/api/user/register",
                         "/api/user/sendCode",
+                        "/api/upload/**",
                         "/error",
                         "/doc.html",
                         "/webjars/**",
