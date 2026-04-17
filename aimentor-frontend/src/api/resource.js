@@ -43,3 +43,35 @@ export const getResourceById = (id) => {
     method: 'get'
   })
 }
+
+/**
+ * 新增资源（教师端）
+ */
+export const createResource = (data) => {
+  return request({
+    url: '/resource/create',
+    method: 'post',
+    data
+  })
+}
+
+/**
+ * 更新资源（教师端）
+ */
+export const updateResource = (id, data) => {
+  return request({
+    url: `/resource/update/${id}`,
+    method: 'put',
+    data
+  })
+}
+
+/**
+ * 删除资源（教师端）
+ */
+export const deleteResource = (id) => {
+  return request({
+    url: `/resource/delete/${id}`,
+    method: 'delete'
+  })
+}

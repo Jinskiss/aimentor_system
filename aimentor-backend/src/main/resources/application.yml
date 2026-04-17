@@ -36,6 +36,7 @@ upload:
 
 mybatis-plus:
   configuration:
+    map-underscore-to-camel-case: true  # 开启驼峰转换
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl # 开启 SQL 日志
     default-enum-type-handler: com.baomidou.mybatisplus.core.handlers.MybatisEnumTypeHandler
   global-config:

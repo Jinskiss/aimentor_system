@@ -11,12 +11,6 @@
           <p class="page-subtitle">精选优质资源，助力学习成长</p>
         </div>
       </div>
-      <div class="header-right">
-        <el-button type="primary" @click="showAddDialog = true">
-          <el-icon><Plus /></el-icon>
-          添加资源
-        </el-button>
-      </div>
     </div>
 
     <!-- 统计卡片 -->
@@ -99,6 +93,10 @@
     <div class="toolbar">
       <div class="toolbar-left">
         <span class="result-count">共 <strong>{{ resources.length }}</strong> 个资源</span>
+        <el-button type="warning" size="small" @click="handleFixCovers" :loading="fixingCover" style="margin-left: 12px;">
+          <el-icon><Refresh /></el-icon>
+          修复封面
+        </el-button>
       </div>
       <div class="toolbar-right">
         <el-select v-model="sortType" size="small" style="width: 120px; margin-right: 10px;">
@@ -242,10 +240,6 @@
           <el-input v-model="addForm.description" type="textarea" :rows="3" placeholder="请输入资源描述" />
         </el-form-item>
       </el-form>
-      <template #footer>
-        <el-button @click="showAddDialog = false">取消</el-button>
-        <el-button type="primary" @click="handleAdd">添加资源</el-button>
-      </template>
     </el-dialog>
   </div>
 </template>
@@ -254,10 +248,11 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { getRecommendResources, getResourcesBySubject, getResourcesByType } from '@/api/resource'
+import request from '@/utils/request'
 import { ElMessage } from 'element-plus'
 import {
   Plus, Collection, VideoPlay, Document, Star, Grid, List,
-  View, EditPen, Microphone, Edit
+  View, EditPen, Microphone, Edit, Refresh
 } from '@element-plus/icons-vue'
 
 const router = useRouter()
@@ -272,6 +267,7 @@ const showAddDialog = ref(false)
 const addFormRef = ref(null)
 const favoriteIds = ref([])
 const imageErrors = ref({})
+const fixingCover = ref(false)
 
 const addForm = ref({
   title: '',
@@ -360,6 +356,31 @@ const handleAdd = async () => {
   }
   ElMessage.success('资源添加成功')
   showAddDialog.value = false
+}
+
+/** 修复B站视频封面 */
+const handleFixCovers = async () => {
+  fixingCover.value = true
+  try {
+    const res = await request({
+      url: '/api/resource/fix-covers',
+      method: 'post'
+    })
+    if (res.code === 200) {
+      ElMessage.success(`封面修复完成：成功 ${res.data.success} 个，失败 ${res.data.failed} 个`)
+      // 重新加载资源列表
+      loadResources()
+      // 清除图片错误记录
+      imageErrors.value = {}
+    } else {
+      ElMessage.error(res.msg || '修复封面失败')
+    }
+  } catch (err) {
+    console.error('修复封面失败:', err)
+    ElMessage.error('修复封面失败')
+  } finally {
+    fixingCover.value = false
+  }
 }
 
 onMounted(() => {
