@@ -4,6 +4,9 @@ import com.jins.aimentor.common.Result;
 import com.jins.aimentor.constants.Status;
 import com.jins.aimentor.domain.entity.User;
 import com.jins.aimentor.domain.vo.*;
+import com.jins.aimentor.domain.entity.Plan;
+import com.jins.aimentor.domain.entity.ScoreRecord;
+import com.jins.aimentor.domain.entity.KnowledgeMastery;
 import com.jins.aimentor.service.TeacherService;
 import com.jins.aimentor.utils.UserHolder;
 import io.swagger.annotations.Api;
@@ -11,8 +14,8 @@ import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
+import java.util.Map;
 
 /**
  * 教师端控制器
@@ -124,5 +127,110 @@ public class TeacherController {
         }
         String targetGrade = (grade != null && !grade.isBlank()) ? grade : teacher.getGrade();
         return Result.success(teacherService.getAttentionStudents(targetGrade));
+    }
+
+    @ApiOperation("获取指定学生的笔记（教师用）")
+    @GetMapping("/student/{studentId}/notes")
+    public Result<List<NoteVO>> getStudentNotes(@PathVariable Long studentId) {
+        User teacher = UserHolder.getUser();
+        if (teacher == null) {
+            return Result.error(Status.CODE_401, "用户未登录");
+        }
+        if (!"teacher".equals(teacher.getRole())) {
+            return Result.error(Status.CODE_403, "仅限教师账号访问");
+        }
+        // 检查权限
+        if (!teacherService.canViewStudent(teacher.getId(), studentId)) {
+            return Result.error(Status.CODE_403, "无权查看该学生数据");
+        }
+        log.info("[TeacherController] 获取学生笔记，teacherId={}, studentId={}", teacher.getId(), studentId);
+        return Result.success(teacherService.getStudentNotes(studentId));
+    }
+
+    @ApiOperation("获取指定学生的学习计划（教师用）")
+    @GetMapping("/student/{studentId}/plans")
+    public Result<List<Plan>> getStudentPlans(@PathVariable Long studentId) {
+        User teacher = UserHolder.getUser();
+        if (teacher == null) {
+            return Result.error(Status.CODE_401, "用户未登录");
+        }
+        if (!"teacher".equals(teacher.getRole())) {
+            return Result.error(Status.CODE_403, "仅限教师账号访问");
+        }
+        if (!teacherService.canViewStudent(teacher.getId(), studentId)) {
+            return Result.error(Status.CODE_403, "无权查看该学生数据");
+        }
+        log.info("[TeacherController] 获取学生学习计划，teacherId={}, studentId={}", teacher.getId(), studentId);
+        return Result.success(teacherService.getStudentPlans(studentId));
+    }
+
+    @ApiOperation("获取指定学生的成绩记录（教师用）")
+    @GetMapping("/student/{studentId}/scores")
+    public Result<List<ScoreRecord>> getStudentScores(@PathVariable Long studentId) {
+        User teacher = UserHolder.getUser();
+        if (teacher == null) {
+            return Result.error(Status.CODE_401, "用户未登录");
+        }
+        if (!"teacher".equals(teacher.getRole())) {
+            return Result.error(Status.CODE_403, "仅限教师账号访问");
+        }
+        if (!teacherService.canViewStudent(teacher.getId(), studentId)) {
+            return Result.error(Status.CODE_403, "无权查看该学生数据");
+        }
+        log.info("[TeacherController] 获取学生成绩记录，teacherId={}, studentId={}", teacher.getId(), studentId);
+        return Result.success(teacherService.getStudentScores(studentId));
+    }
+
+    @ApiOperation("获取指定学生的知识点掌握度（教师用）")
+    @GetMapping("/student/{studentId}/masteries")
+    public Result<List<KnowledgeMastery>> getStudentMasteries(@PathVariable Long studentId) {
+        User teacher = UserHolder.getUser();
+        if (teacher == null) {
+            return Result.error(Status.CODE_401, "用户未登录");
+        }
+        if (!"teacher".equals(teacher.getRole())) {
+            return Result.error(Status.CODE_403, "仅限教师账号访问");
+        }
+        if (!teacherService.canViewStudent(teacher.getId(), studentId)) {
+            return Result.error(Status.CODE_403, "无权查看该学生数据");
+        }
+        log.info("[TeacherController] 获取学生知识点掌握度，teacherId={}, studentId={}", teacher.getId(), studentId);
+        return Result.success(teacherService.getStudentMasteries(studentId));
+    }
+
+    @ApiOperation("获取所有学生笔记列表（教师用）")
+    @GetMapping("/notes")
+    public Result<List<Map<String, Object>>> getAllStudentNotes(
+            @RequestParam(required = false) String subject,
+            @RequestParam(required = false) Long studentId) {
+        User teacher = UserHolder.getUser();
+        if (teacher == null) {
+            return Result.error(Status.CODE_401, "用户未登录");
+        }
+        if (!"teacher".equals(teacher.getRole())) {
+            return Result.error(Status.CODE_403, "仅限教师账号访问");
+        }
+        log.info("[TeacherController] 获取学生笔记列表，teacherId={}, subject={}, studentId={}",
+                teacher.getId(), subject, studentId);
+        List<Map<String, Object>> notes = teacherService.getAllStudentNotes(subject, studentId);
+        return Result.success(notes);
+    }
+
+    @ApiOperation("获取所有学生学习计划（教师用）")
+    @GetMapping("/plans")
+    public Result<List<Map<String, Object>>> getAllStudentPlans(
+            @RequestParam(required = false) String subject,
+            @RequestParam(required = false) Long studentId) {
+        User teacher = UserHolder.getUser();
+        if (teacher == null) {
+            return Result.error(Status.CODE_401, "用户未登录");
+        }
+        if (!"teacher".equals(teacher.getRole())) {
+            return Result.error(Status.CODE_403, "仅限教师账号访问");
+        }
+        log.info("[TeacherController] 获取学生学习计划，teacherId={}, subject={}, studentId={}",
+                teacher.getId(), subject, studentId);
+        List<Map<String, Object>> plans = teacherService.getAllStudentPlans(subject, studentId);
+        return Result.success(plans);
     }
 }

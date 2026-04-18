@@ -138,7 +138,7 @@ public class ResourceController {
         boolean success = resourceService.saveResource(resource);
         if (success) {
             ResourceVO vo = toVO(resource);
-            return Result.success(vo, "添加成功");
+            return Result.success(vo);
         }
         return Result.error(Status.CODE_500, "添加失败");
     }
@@ -147,7 +147,7 @@ public class ResourceController {
     @PutMapping("/update/{id}")
     public Result<ResourceVO> updateResource(@PathVariable Long id, @RequestBody Resource resource) {
         log.info("[ResourceController] 更新资源，id={}", id);
-        Resource existing = getById(id);
+        ResourceVO existing = resourceService.getResourceById(id);
         if (existing == null) {
             return Result.error(Status.CODE_404, "资源不存在");
         }
@@ -156,7 +156,7 @@ public class ResourceController {
         boolean success = resourceService.updateById(resource);
         if (success) {
             ResourceVO vo = resourceService.getResourceById(id);
-            return Result.success(vo, "更新成功");
+            return Result.success(vo);
         }
         return Result.error(Status.CODE_500, "更新失败");
     }
@@ -164,10 +164,10 @@ public class ResourceController {
     @ApiOperation("删除资源（教师端）")
     @DeleteMapping("/delete/{id}")
     public Result<Void> deleteResource(@PathVariable Long id) {
-        log.info("[ResourceController] 删��资源，id={}", id);
+        log.info("[ResourceController] 删除资源，id={}", id);
         boolean success = resourceService.deleteResource(id);
         if (success) {
-            return Result.success("删除成功");
+            return Result.success();
         }
         return Result.error(Status.CODE_500, "删除失败");
     }

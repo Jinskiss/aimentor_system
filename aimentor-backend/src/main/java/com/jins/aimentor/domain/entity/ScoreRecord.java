@@ -1,6 +1,8 @@
 package com.jins.aimentor.domain.entity;
 
 import com.baomidou.mybatisplus.annotation.*;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import lombok.Data;
 
 import java.time.LocalDate;
@@ -9,9 +11,11 @@ import java.util.Date;
 /**
  * 成绩记录实体类
  *
- * <p>对应数据库表：score_record（表名不带t_前缀）</p>
- * <p>存储学生的考试成绩信息</p>
+ * <p>对应数据库表：score_record（表名不带t_前缀）
+ * <p>存储学生的考试成绩信息
  *
+ * <p>⚠️ 注意：id 和 studentId 字段添加了 @JsonSerialize 注解，在序列化时转为 String，
+ * 避免前端 JavaScript Number 精度丢失问题（雪花算法 ID 超过 16 位时会丢失精度）。
  */
 @Data
 @TableName("score_record")
@@ -21,12 +25,14 @@ public class ScoreRecord {
      * 记录ID
      */
     @TableId(type = IdType.AUTO)
+    @JsonSerialize(using = ToStringSerializer.class)
     private Long id;
 
     /**
      * 学生ID
      * <p>关联user表</p>
      */
+    @JsonSerialize(using = ToStringSerializer.class)
     private Long studentId;
 
     /**

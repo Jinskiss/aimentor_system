@@ -1,6 +1,8 @@
 package com.jins.aimentor.domain.entity;
 
 import com.baomidou.mybatisplus.annotation.*;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import lombok.Data;
 
 import java.util.Date;
@@ -8,9 +10,11 @@ import java.util.Date;
 /**
  * 知识点掌握度实体类
  *
- * <p>对应数据库表：knowledge_mastery</p>
- * <p>记录学生对各知识点的掌握程度（0-100）</p>
+ * <p>对应数据库表：knowledge_mastery
+ * <p>记录学生对各知识点的掌握程度（0-100）
  *
+ * <p>⚠️ 注意：id 和 studentId 字段添加了 @JsonSerialize 注解，在序列化时转为 String，
+ * 避免前端 JavaScript Number 精度丢失问题。
  */
 @Data
 @TableName("knowledge_mastery")
@@ -20,11 +24,13 @@ public class KnowledgeMastery {
      * 记录ID
      */
     @TableId(type = IdType.AUTO)
+    @JsonSerialize(using = ToStringSerializer.class)
     private Long id;
 
     /**
      * 学生ID
      */
+    @JsonSerialize(using = ToStringSerializer.class)
     private Long studentId;
 
     /**
