@@ -25,8 +25,10 @@ const routes = [
       const role = localStorage.getItem('userRole')
       // 未登录直接跳转登录页
       if (!token) return '/login'
-      // 统一跳转到资源页面
-      return '/resource'
+      // 根据角色跳转到对应首页
+      if (role === 'admin') return '/admin/dashboard'
+      if (role === 'teacher') return '/teacher/dashboard'
+      return '/dashboard'
     },
     children: [
       // ===== 学生路由 =====
@@ -58,7 +60,7 @@ const routes = [
         path: 'resource',
         name: 'Resource',
         component: () => import('@/views/Resource.vue'),
-        meta: { title: '资源推荐' }
+        meta: { title: '学习资料' }
       },
       {
         path: 'resource/:id',
@@ -92,6 +94,12 @@ const routes = [
         meta: { title: '教师首页', roles: ['teacher'] }
       },
       {
+        path: 'teacher/profile',
+        name: 'TeacherProfile',
+        component: () => import('@/views/TeacherProfile.vue'),
+        meta: { title: '个人中心', roles: ['teacher'] }
+      },
+      {
         path: 'teacher/students',
         name: 'TeacherStudents',
         component: () => import('@/views/TeacherStudents.vue'),
@@ -113,7 +121,7 @@ const routes = [
         path: 'teacher/resource',
         name: 'TeacherResource',
         component: () => import('@/views/TeacherResource.vue'),
-        meta: { title: '班级资源', roles: ['teacher'] }
+        meta: { title: '学习资料', roles: ['teacher'] }
       },
       {
         path: 'teacher/notes',
@@ -126,18 +134,35 @@ const routes = [
         name: 'TeacherAI',
         component: () => import('@/views/TeacherAI.vue'),
         meta: { title: 'AI分析助手', roles: ['teacher'] }
+      },
+      // ===== 管理端路由 =====
+      {
+        path: 'admin/dashboard',
+        name: 'AdminDashboard',
+        component: () => import('@/views/AdminDashboard.vue'),
+        meta: { title: '管理首页', roles: ['admin'] }
+      },
+      {
+        path: 'admin/users',
+        name: 'AdminUsers',
+        component: () => import('@/views/AdminUsers.vue'),
+        meta: { title: '用户管理', roles: ['admin'] }
+      },
+      {
+        path: 'admin/resources',
+        name: 'AdminResources',
+        component: () => import('@/views/AdminResources.vue'),
+        meta: { title: '资源管理', roles: ['admin'] }
+      },
+      {
+        path: 'admin/logs',
+        name: 'AdminLogs',
+        component: () => import('@/views/AdminLogs.vue'),
+        meta: { title: '日志管理', roles: ['admin'] }
       }
     ]
   }
 ]
-
-/**
- * 根据用户角色获取默认跳转路由
- */
-function getDefaultRoute() {
-  // 统一跳转到资源页面
-  return '/resource'
-}
 
 const router = createRouter({
   history: createWebHistory(),
@@ -164,11 +189,31 @@ router.beforeEach((to, from, next) => {
     return
   }
 
-  // 已登录访问公开页面 → 重定向到首页（避免循环，只在访问 /login 时重定向）
-  if (to.path === '/login' || to.path === '/') {
-    // 统一跳转到资源页面
-    next('/resource')
+  // 已登录访问公开页面 → 重定向到对应首页
+  if (to.path === '/login') {
+    if (userRole === 'admin') {
+      next('/admin/dashboard')
+    } else if (userRole === 'teacher') {
+      next('/teacher/dashboard')
+    } else {
+      next('/dashboard')
+    }
     return
+  }
+
+  // 检查页面权限
+  if (to.meta.roles && to.meta.roles.length > 0) {
+    if (!to.meta.roles.includes(userRole)) {
+      // 没有权限，跳转到对应角色的首页
+      if (userRole === 'admin') {
+        next('/admin/dashboard')
+      } else if (userRole === 'teacher') {
+        next('/teacher/dashboard')
+      } else {
+        next('/dashboard')
+      }
+      return
+    }
   }
 
   next()

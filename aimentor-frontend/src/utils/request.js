@@ -47,8 +47,13 @@ function resolveResponseErrorMessage(data) {
 }
 
 // 创建axios实例
+// 开发环境使用完整地址，生产环境使用相对路径
+const baseURL = process.env.NODE_ENV === 'production'
+  ? '/api'
+  : 'http://localhost:8091/api'
+
 const request = axios.create({
-  baseURL: '/api',  // 后端API基础地址
+  baseURL: baseURL,
   timeout: 10000,  // 请求超时时间
   headers: {
     'Content-Type': 'application/json'

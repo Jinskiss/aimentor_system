@@ -53,6 +53,14 @@
             <el-icon><Notebook /></el-icon>
             <template #title>学习笔记</template>
           </el-menu-item>
+          <el-menu-item index="/profile">
+            <el-icon><User /></el-icon>
+            <template #title>个人中心</template>
+          </el-menu-item>
+          <el-menu-item index="/settings">
+            <el-icon><Setting /></el-icon>
+            <template #title>设置</template>
+          </el-menu-item>
         </template>
 
         <!-- ===== 教师菜单 ===== -->
@@ -62,8 +70,8 @@
             <template #title>教师首页</template>
           </el-menu-item>
           <el-menu-item index="/teacher/students">
-            <el-icon><Edit /></el-icon>
-            <template #title>学生学情</template>
+            <el-icon><User /></el-icon>
+            <template #title>学生管理</template>
           </el-menu-item>
           <el-menu-item index="/teacher/plan">
             <el-icon><Calendar /></el-icon>
@@ -81,6 +89,14 @@
             <el-icon><ChatDotRound /></el-icon>
             <template #title>AI分析助手</template>
           </el-menu-item>
+          <el-menu-item index="/teacher/profile">
+            <el-icon><User /></el-icon>
+            <template #title>个人中心</template>
+          </el-menu-item>
+          <el-menu-item index="/settings">
+            <el-icon><Setting /></el-icon>
+            <template #title>设置</template>
+          </el-menu-item>
         </template>
 
         <!-- ===== 管理员菜单 ===== -->
@@ -89,17 +105,27 @@
             <el-icon><DataLine /></el-icon>
             <template #title>管理首页</template>
           </el-menu-item>
+          <el-menu-item index="/admin/users">
+            <el-icon><User /></el-icon>
+            <template #title>用户管理</template>
+          </el-menu-item>
+          <el-menu-item index="/admin/resources">
+            <el-icon><Collection /></el-icon>
+            <template #title>资源管理</template>
+          </el-menu-item>
+          <el-menu-item index="/admin/logs">
+            <el-icon><Document /></el-icon>
+            <template #title>日志管理</template>
+          </el-menu-item>
+          <el-menu-item index="/profile">
+            <el-icon><UserFilled /></el-icon>
+            <template #title>个人中心</template>
+          </el-menu-item>
+          <el-menu-item index="/settings">
+            <el-icon><Setting /></el-icon>
+            <template #title>设置</template>
+          </el-menu-item>
         </template>
-
-        <!-- ===== 通用菜单 ===== -->
-        <el-menu-item index="/profile">
-          <el-icon><User /></el-icon>
-          <template #title>个人中心</template>
-        </el-menu-item>
-        <el-menu-item index="/settings">
-          <el-icon><Setting /></el-icon>
-          <template #title>设置</template>
-        </el-menu-item>
       </el-menu>
 
       <!-- 折叠按钮 -->
@@ -162,8 +188,8 @@
           <div class="user-info">
             <el-dropdown trigger="click" @command="handleCommand">
               <div class="user-avatar">
-                <el-avatar :size="36" :src="userStore.userInfo?.avatar" :style="{ backgroundColor: 'var(--theme-color)' }">
-                  {{ (userStore.username || '同学').charAt(0).toUpperCase() }}
+                <el-avatar :size="36" fit="cover" :src="userStore.userInfo?.avatar && userStore.userInfo?.avatar !== '' ? userStore.userInfo.avatar : undefined" :style="{ backgroundColor: !userStore.userInfo?.avatar || userStore.userInfo?.avatar === '' ? 'var(--theme-color)' : 'transparent' }">
+                  {{ (!userStore.userInfo?.avatar || userStore.userInfo?.avatar === '') ? (userStore.username || '同学').charAt(0).toUpperCase() : '' }}
                 </el-avatar>
                 <div class="user-detail">
                   <span class="user-name">{{ userStore.username || '同学' }}</span>
@@ -210,6 +236,7 @@ import {
   Bell,
   ArrowDown,
   User,
+  UserFilled,
   Setting,
   SwitchButton,
   CircleCheck,
@@ -263,6 +290,8 @@ const menuActivePath = computed(() => {
   if (p.startsWith('/teacher/notes')) return '/teacher/notes'
   if (p.startsWith('/teacher/ai')) return '/teacher/ai'
   if (p.startsWith('/teacher/')) return '/teacher/dashboard'
+  if (p.startsWith('/admin/users')) return '/admin/users'
+  if (p.startsWith('/admin/resources')) return '/admin/resources'
   if (p.startsWith('/admin/')) return '/admin/dashboard'
   return p
 })
@@ -272,17 +301,19 @@ const currentPageName = computed(() => {
   if (route.path === '/teacher/dashboard') return '教师首页'
   if (route.path === '/teacher/students') return '学生学情'
   if (route.path === '/teacher/plan') return '班级计划'
-  if (route.path === '/teacher/resource') return '班级资源'
+  if (route.path === '/teacher/resource') return '学习资料'
   if (route.path === '/teacher/notes') return '班级笔记'
   if (route.path === '/teacher/ai') return 'AI分析助手'
   if (route.name === 'TeacherStudentDetail') return '学生学情详情'
   if (route.path === '/admin/dashboard') return '管理首页'
+  if (route.path === '/admin/users') return '用户管理'
+  if (route.path === '/admin/resources') return '资源管理'
   const routeMap = {
     '/dashboard': '学情信息',
     '/record-manage': '学情记录',
     '/plan': '学习计划',
     '/qa': 'AI问答',
-    '/resource': '资源推荐',
+    '/resource': '学习资料',
     '/notes': '学习笔记',
     '/profile': '个人中心',
     '/settings': '设置'

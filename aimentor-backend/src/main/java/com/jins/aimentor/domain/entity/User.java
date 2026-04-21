@@ -85,12 +85,12 @@ public class User {
     private Integer totalMinutes;
 
     /**
-     * 用户等级
+     * 用户等级（1-100）
      */
     private Integer level;
 
     /**
-     * 经验值
+     * 经验值（达到一定值可升级）
      */
     private Integer experience;
 

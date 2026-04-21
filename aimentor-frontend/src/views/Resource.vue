@@ -7,8 +7,8 @@
           <el-icon class="header-icon"><Collection /></el-icon>
         </div>
         <div class="header-text">
-          <h2 class="page-title">学习资源</h2>
-          <p class="page-subtitle">精选优质资源，助力学习成长</p>
+          <h2 class="page-title">学习资料</h2>
+          <p class="page-subtitle">学习路上，资料相伴</p>
         </div>
       </div>
     </div>
