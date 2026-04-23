@@ -86,10 +86,78 @@ public class AdminServiceImpl extends ServiceImpl<UserMapper, User> implements A
         );
         stats.put("totalExercises", totalExercises);
 
-        // 计算增长率（模拟数据，实际应该对比历史数据）
-        stats.put("userGrowth", 12);
-        stats.put("teacherGrowth", 5);
-        stats.put("resourceGrowth", 8);
+        // 计算真实增长率（本周 vs 上周）
+        Calendar thisWeekStart = Calendar.getInstance();
+        thisWeekStart.add(Calendar.DAY_OF_YEAR, -7);
+        thisWeekStart.set(Calendar.HOUR_OF_DAY, 0);
+        thisWeekStart.set(Calendar.MINUTE, 0);
+        thisWeekStart.set(Calendar.SECOND, 0);
+
+        Calendar lastWeekStart = Calendar.getInstance();
+        lastWeekStart.add(Calendar.DAY_OF_YEAR, -14);
+        lastWeekStart.set(Calendar.HOUR_OF_DAY, 0);
+        lastWeekStart.set(Calendar.MINUTE, 0);
+        lastWeekStart.set(Calendar.SECOND, 0);
+
+        // 本周新增用户
+        Long thisWeekUsers = userMapper.selectCount(
+                new LambdaQueryWrapper<User>()
+                        .ge(User::getCreateTime, thisWeekStart.getTime())
+        );
+        // 上周新增用户
+        Long lastWeekUsers = userMapper.selectCount(
+                new LambdaQueryWrapper<User>()
+                        .ge(User::getCreateTime, lastWeekStart.getTime())
+                        .lt(User::getCreateTime, thisWeekStart.getTime())
+        );
+        // 用户增长率
+        int userGrowth = 0;
+        if (lastWeekUsers > 0) {
+            userGrowth = (int) ((thisWeekUsers - lastWeekUsers) * 100 / lastWeekUsers);
+        } else if (thisWeekUsers > 0) {
+            userGrowth = 100;
+        }
+        stats.put("userGrowth", userGrowth);
+
+        // 本周新增资源
+        Long thisWeekResources = resourceMapper.selectCount(
+                new LambdaQueryWrapper<Resource>()
+                        .ge(Resource::getCreateTime, thisWeekStart.getTime())
+        );
+        // 上周新增资源
+        Long lastWeekResources = resourceMapper.selectCount(
+                new LambdaQueryWrapper<Resource>()
+                        .ge(Resource::getCreateTime, lastWeekStart.getTime())
+                        .lt(Resource::getCreateTime, thisWeekStart.getTime())
+        );
+        // 资源增长率
+        int resourceGrowth = 0;
+        if (lastWeekResources > 0) {
+            resourceGrowth = (int) ((thisWeekResources - lastWeekResources) * 100 / lastWeekResources);
+        } else if (thisWeekResources > 0) {
+            resourceGrowth = 100;
+        }
+        stats.put("resourceGrowth", resourceGrowth);
+
+        // 教师增长率（本周 vs 上周）
+        Long thisWeekTeachers = userMapper.selectCount(
+                new LambdaQueryWrapper<User>()
+                        .eq(User::getRole, "teacher")
+                        .ge(User::getCreateTime, thisWeekStart.getTime())
+        );
+        Long lastWeekTeachers = userMapper.selectCount(
+                new LambdaQueryWrapper<User>()
+                        .eq(User::getRole, "teacher")
+                        .ge(User::getCreateTime, lastWeekStart.getTime())
+                        .lt(User::getCreateTime, thisWeekStart.getTime())
+        );
+        int teacherGrowth = 0;
+        if (lastWeekTeachers > 0) {
+            teacherGrowth = (int) ((thisWeekTeachers - lastWeekTeachers) * 100 / lastWeekTeachers);
+        } else if (thisWeekTeachers > 0) {
+            teacherGrowth = 100;
+        }
+        stats.put("teacherGrowth", teacherGrowth);
 
         return stats;
     }
@@ -98,17 +166,45 @@ public class AdminServiceImpl extends ServiceImpl<UserMapper, User> implements A
     public List<Map<String, Object>> getUserGrowth(Integer days) {
         List<Map<String, Object>> result = new ArrayList<>();
         SimpleDateFormat sdf = new SimpleDateFormat("MM/dd");
+        SimpleDateFormat fullSdf = new SimpleDateFormat("yyyy-MM-dd");
 
         for (int i = days - 1; i >= 0; i--) {
             Map<String, Object> dayData = new HashMap<>();
             Calendar cal = Calendar.getInstance();
             cal.add(Calendar.DAY_OF_YEAR, -i);
+            String dateStr = sdf.format(cal.getTime());
+            dayData.put("date", dateStr);
 
-            dayData.put("date", sdf.format(cal.getTime()));
+            // 获取当天开始和结束时间
+            Calendar dayStart = Calendar.getInstance();
+            dayStart.setTime(cal.getTime());
+            dayStart.set(Calendar.HOUR_OF_DAY, 0);
+            dayStart.set(Calendar.MINUTE, 0);
+            dayStart.set(Calendar.SECOND, 0);
+            dayStart.set(Calendar.MILLISECOND, 0);
 
-            // 模拟数据，实际应该从数据库查询
-            dayData.put("users", (int) (Math.random() * 20) + 5);
-            dayData.put("resources", (int) (Math.random() * 15) + 3);
+            Calendar dayEnd = Calendar.getInstance();
+            dayEnd.setTime(cal.getTime());
+            dayEnd.set(Calendar.HOUR_OF_DAY, 23);
+            dayEnd.set(Calendar.MINUTE, 59);
+            dayEnd.set(Calendar.SECOND, 59);
+            dayEnd.set(Calendar.MILLISECOND, 999);
+
+            // 统计当天新增用户数
+            Long newUsers = userMapper.selectCount(
+                    new LambdaQueryWrapper<User>()
+                            .ge(User::getCreateTime, dayStart.getTime())
+                            .le(User::getCreateTime, dayEnd.getTime())
+            );
+            dayData.put("users", newUsers);
+
+            // 统计当天新增资源数
+            Long newResources = resourceMapper.selectCount(
+                    new LambdaQueryWrapper<Resource>()
+                            .ge(Resource::getCreateTime, dayStart.getTime())
+                            .le(Resource::getCreateTime, dayEnd.getTime())
+            );
+            dayData.put("resources", newResources);
 
             result.add(dayData);
         }
@@ -142,6 +238,50 @@ public class AdminServiceImpl extends ServiceImpl<UserMapper, User> implements A
         stats.put("subjectDistribution", subjectCount);
 
         return stats;
+    }
+
+    @Override
+    public List<Map<String, Object>> getRecentActivities() {
+        List<Map<String, Object>> activities = new ArrayList<>();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+
+        // 获取最近注册的用户（最新5条）
+        LambdaQueryWrapper<User> userWrapper = new LambdaQueryWrapper<>();
+        userWrapper.orderByDesc(User::getCreateTime).last("LIMIT 5");
+        List<User> recentUsers = userMapper.selectList(userWrapper);
+
+        for (User user : recentUsers) {
+            Map<String, Object> activity = new HashMap<>();
+            activity.put("type", "user");
+            activity.put("text", "新用户「" + user.getUsername() + "」注册成功");
+            activity.put("time", user.getCreateTime() != null ? sdf.format(user.getCreateTime()) : "");
+            activities.add(activity);
+        }
+
+        // 获取最近上传的资源（最新5条）
+        LambdaQueryWrapper<Resource> resourceWrapper = new LambdaQueryWrapper<>();
+        resourceWrapper.orderByDesc(Resource::getCreateTime).last("LIMIT 5");
+        List<Resource> recentResources = resourceMapper.selectList(resourceWrapper);
+
+        for (Resource resource : recentResources) {
+            Map<String, Object> activity = new HashMap<>();
+            activity.put("type", "resource");
+            activity.put("text", "「" + resource.getTitle() + "」资源已发布");
+            activity.put("time", resource.getCreateTime() != null ? sdf.format(resource.getCreateTime()) : "");
+            activities.add(activity);
+        }
+
+        // 按时间排序（最新的在前）
+        activities.sort((a, b) -> {
+            String timeA = (String) a.get("time");
+            String timeB = (String) b.get("time");
+            if (timeA == null || timeA.isEmpty()) return 1;
+            if (timeB == null || timeB.isEmpty()) return -1;
+            return timeB.compareTo(timeA);
+        });
+
+        // 返回前10条
+        return activities.stream().limit(10).toList();
     }
 
     // ========== 用户管理 ==========
@@ -381,5 +521,51 @@ public class AdminServiceImpl extends ServiceImpl<UserMapper, User> implements A
     @Transactional
     public void clearLoginLogs() {
         loginLogMapper.delete(null);
+    }
+
+    @Override
+    public List<Map<String, Object>> getRecentLogs() {
+        List<Map<String, Object>> logs = new ArrayList<>();
+
+        // 获取最近的操作日志
+        LambdaQueryWrapper<OperationLog> opWrapper = new LambdaQueryWrapper<>();
+        opWrapper.orderByDesc(OperationLog::getCreateTime).last("LIMIT 10");
+        List<OperationLog> opLogs = operationLogMapper.selectList(opWrapper);
+
+        for (OperationLog log : opLogs) {
+            Map<String, Object> item = new HashMap<>();
+            item.put("id", log.getId());
+            item.put("type", log.getOperation());
+            item.put("operation", log.getOperation() + (log.getUrl() != null ? " - " + log.getUrl() : ""));
+            item.put("username", log.getUsername());
+            item.put("createdAt", log.getCreateTime());
+            logs.add(item);
+        }
+
+        // 获取最近的登录日志
+        LambdaQueryWrapper<LoginLog> loginWrapper = new LambdaQueryWrapper<>();
+        loginWrapper.orderByDesc(LoginLog::getCreateTime).last("LIMIT 10");
+        List<LoginLog> loginLogs = loginLogMapper.selectList(loginWrapper);
+
+        for (LoginLog log : loginLogs) {
+            Map<String, Object> item = new HashMap<>();
+            item.put("id", log.getId());
+            item.put("type", "LOGIN");
+            item.put("operation", (log.getStatus() == 1 ? "登录成功" : "登录失败") + (log.getIp() != null ? " - " + log.getIp() : ""));
+            item.put("username", log.getUsername());
+            item.put("createdAt", log.getCreateTime());
+            logs.add(item);
+        }
+
+        // 按时间排序
+        logs.sort((a, b) -> {
+            Date timeA = (Date) a.get("createdAt");
+            Date timeB = (Date) b.get("createdAt");
+            if (timeA == null) return 1;
+            if (timeB == null) return -1;
+            return timeB.compareTo(timeA);
+        });
+
+        return logs.stream().limit(10).toList();
     }
 }

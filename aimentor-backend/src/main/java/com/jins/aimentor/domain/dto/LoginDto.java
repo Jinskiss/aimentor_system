@@ -28,4 +28,23 @@ public class LoginDto implements Serializable {
     @NotBlank(message = "密码不能为空")
     private String password;
 
+    /**
+     * IP地址
+     */
+    private String ip;
+
+    /**
+     * 登录地点
+     */
+    private String location;
+
+    /**
+     * 操作系统
+     */
+    private String os;
+
+    /**
+     * 浏览器
+     */
+    private String browser;
 }

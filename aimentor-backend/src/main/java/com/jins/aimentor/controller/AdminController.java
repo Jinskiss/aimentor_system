@@ -77,6 +77,16 @@ public class AdminController {
         return Result.success(adminService.getResourceStats());
     }
 
+    /**
+     * 获取最新动态
+     */
+    @GetMapping("/analytics/recent-activities")
+    @Operation(summary = "获取最新动态")
+    public Result<List<Map<String, Object>>> getRecentActivities() {
+        checkAdmin();
+        return Result.success(adminService.getRecentActivities());
+    }
+
     // ========== 用户管理 ==========
 
     /**
@@ -356,6 +366,16 @@ public class AdminController {
         checkAdmin();
         adminService.clearLoginLogs();
         return Result.success();
+    }
+
+    /**
+     * 获取最近的日志（合并操作日志和登录日志）
+     */
+    @GetMapping("/logs/recent")
+    @Operation(summary = "获取最近的日志")
+    public Result<List<Map<String, Object>>> getRecentLogs() {
+        checkAdmin();
+        return Result.success(adminService.getRecentLogs());
     }
 
     /**

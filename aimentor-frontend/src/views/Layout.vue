@@ -109,10 +109,6 @@
             <el-icon><User /></el-icon>
             <template #title>用户管理</template>
           </el-menu-item>
-          <el-menu-item index="/admin/resources">
-            <el-icon><Collection /></el-icon>
-            <template #title>资源管理</template>
-          </el-menu-item>
           <el-menu-item index="/admin/logs">
             <el-icon><Document /></el-icon>
             <template #title>日志管理</template>

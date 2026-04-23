@@ -62,7 +62,7 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { User, Lock } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
@@ -72,6 +72,42 @@ const router = useRouter()
 const userStore = useUserStore()
 const formRef = ref(null)
 const loading = ref(false)
+
+// 客户端信息
+const clientInfo = reactive({
+  ip: '127.0.0.1',
+  location: '本地',
+  os: 'Windows',
+  browser: 'Chrome'
+})
+
+// 获取客户端信息
+onMounted(() => {
+  clientInfo.os = getOS()
+  clientInfo.browser = getBrowser()
+})
+
+// 获取操作系统
+function getOS() {
+  const ua = navigator.userAgent
+  if (ua.indexOf('Win') !== -1) return 'Windows'
+  if (ua.indexOf('Mac') !== -1) return 'macOS'
+  if (ua.indexOf('Linux') !== -1) return 'Linux'
+  if (ua.indexOf('Android') !== -1) return 'Android'
+  if (ua.indexOf('iPhone') !== -1 || ua.indexOf('iPad') !== -1) return 'iOS'
+  return 'Unknown'
+}
+
+// 获取浏览器
+function getBrowser() {
+  const ua = navigator.userAgent
+  if (ua.indexOf('Chrome') !== -1 && ua.indexOf('Edg') === -1) return 'Chrome'
+  if (ua.indexOf('Firefox') !== -1) return 'Firefox'
+  if (ua.indexOf('Safari') !== -1 && ua.indexOf('Chrome') === -1) return 'Safari'
+  if (ua.indexOf('Edg') !== -1) return 'Edge'
+  if (ua.indexOf('QQ') !== -1) return 'QQ'
+  return 'Unknown'
+}
 
 const form = reactive({
   username: '',
@@ -90,7 +126,12 @@ const handleLogin = async () => {
   loading.value = true
   try {
     console.log('开始登录...')
-    const result = await userStore.login(form)
+    // 登录时附带客户端信息
+    const loginData = {
+      ...form,
+      ...clientInfo
+    }
+    const result = await userStore.login(loginData)
     console.log('登录结果:', result)
 
     if (result && userStore.isLoggedIn) {

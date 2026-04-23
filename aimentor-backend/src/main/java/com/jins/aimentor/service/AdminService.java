@@ -30,6 +30,11 @@ public interface AdminService extends IService<User> {
      */
     Map<String, Object> getResourceStats();
 
+    /**
+     * 获取最新动态
+     */
+    List<Map<String, Object>> getRecentActivities();
+
     // ========== 用户管理 ==========
 
     /**
@@ -125,4 +130,9 @@ public interface AdminService extends IService<User> {
      * 清空登录日志
      */
     void clearLoginLogs();
+
+    /**
+     * 获取最近的日志（合并操作日志和登录日志）
+     */
+    List<Map<String, Object>> getRecentLogs();
 }

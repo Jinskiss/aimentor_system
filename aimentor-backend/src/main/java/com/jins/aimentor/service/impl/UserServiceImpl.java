@@ -6,10 +6,13 @@ import com.jins.aimentor.constants.RedisConstants;
 import com.jins.aimentor.constants.Status;
 import com.jins.aimentor.domain.dto.LoginDto;
 import com.jins.aimentor.domain.dto.RegistDto;
+import com.jins.aimentor.domain.entity.LoginLog;
 import com.jins.aimentor.domain.entity.User;
 import com.jins.aimentor.domain.vo.UserVO;
 import com.jins.aimentor.exception.BizException;
+import com.jins.aimentor.mapper.LoginLogMapper;
 import com.jins.aimentor.mapper.UserMapper;
+import com.jins.aimentor.service.LogService;
 import com.jins.aimentor.service.UserService;
 import com.jins.aimentor.utils.TokenUtils;
 import com.jins.aimentor.utils.UserHolder;
@@ -20,6 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
@@ -32,8 +36,8 @@ import java.util.concurrent.TimeUnit;
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
 
     private final RedisTemplate redisTemplate;
-
     private final UserMapper userMapper;
+    private final LogService logService;
 
     /**
      * 存储验证码的Map（模拟Redis，生产环境应使用Redis）
@@ -110,10 +114,30 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         queryWrapper.eq(User::getUsername, loginForm.getUsername());
         User user = getOne(queryWrapper);
 
+        // 创建登录日志对象（默认失败状态）
+        LoginLog loginLog = new LoginLog();
+        loginLog.setUsername(loginForm.getUsername());
+        loginLog.setIp(loginForm.getIp());
+        loginLog.setLocation(loginForm.getLocation());
+        loginLog.setOs(loginForm.getOs());
+        loginLog.setBrowser(loginForm.getBrowser());
+
         if (user == null || !Objects.equals(loginForm.getPassword(), user.getPassword())) {
             log.error("用户登录失败，用户名或密码错误");
+            // 记录登录失败日志
+            loginLog.setStatus(0);
+            loginLog.setMsg("用户名或密码错误");
+            loginLog.setUserId(null);
+            loginLog.setRole(null);
+            logService.recordLoginLog(loginLog);
             throw new BizException(Status.CODE_403, "用户名或密码错误");
         }
+
+        // 登录成功
+        loginLog.setUserId(user.getId());
+        loginLog.setRole(user.getRole());
+        loginLog.setStatus(1);
+        loginLog.setMsg("登录成功");
 
         // 保存用户信息到ThreadLocal
         UserHolder.saveUser(user);
@@ -127,6 +151,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
         //jwt不设置过期时间，只设置redis过期时间。
         redisTemplate.expire(RedisConstants.USER_TOKEN_KEY + token, RedisConstants.USER_TOKEN_TTL, TimeUnit.MINUTES);
+
+        // 记录登录成功日志
+        logService.recordLoginLog(loginLog);
 
         return token;
     }

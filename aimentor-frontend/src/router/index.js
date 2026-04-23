@@ -149,12 +149,6 @@ const routes = [
         meta: { title: '用户管理', roles: ['admin'] }
       },
       {
-        path: 'admin/resources',
-        name: 'AdminResources',
-        component: () => import('@/views/AdminResources.vue'),
-        meta: { title: '资源管理', roles: ['admin'] }
-      },
-      {
         path: 'admin/logs',
         name: 'AdminLogs',
         component: () => import('@/views/AdminLogs.vue'),
