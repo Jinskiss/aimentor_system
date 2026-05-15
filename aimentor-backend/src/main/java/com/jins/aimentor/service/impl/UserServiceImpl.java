@@ -79,7 +79,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
         user = new User();
         user.setUsername(registForm.getUsername());
-        user.setPassword(registForm.getPassword());
+        user.setPassword(registForm.getPassword() != null ? registForm.getPassword().trim() : null);
         user.setName(registForm.getName());
         user.setEmail(registForm.getEmail());
         user.setPhone(registForm.getPhone());
@@ -122,7 +122,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         loginLog.setOs(loginForm.getOs());
         loginLog.setBrowser(loginForm.getBrowser());
 
-        if (user == null || !Objects.equals(loginForm.getPassword(), user.getPassword())) {
+        if (user == null || !Objects.equals(loginForm.getPassword().trim(), user.getPassword().trim())) {
             log.error("用户登录失败，用户名或密码错误");
             // 记录登录失败日志
             loginLog.setStatus(0);
@@ -134,6 +134,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         }
 
         // 登录成功
+        log.info("用户登录成功，userId: {}, 用户名: {}", user.getId(), user.getUsername());
         loginLog.setUserId(user.getId());
         loginLog.setRole(user.getRole());
         loginLog.setStatus(1);

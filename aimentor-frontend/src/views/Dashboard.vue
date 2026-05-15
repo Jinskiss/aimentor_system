@@ -1,27 +1,20 @@
 <template>
   <div class="dashboard">
     <div class="page-header">
-      <div class="header-left">
-        <h2 class="page-title">学情分析仪表盘</h2>
-        <p class="page-subtitle">全面了解你的学习状况</p>
-      </div>
-      <div class="header-right">
-        <div class="stat-card mini">
-          <div class="stat-icon blue">
-            <el-icon><DataLine /></el-icon>
-          </div>
-          <div class="stat-info">
-            <span class="stat-value">{{ totalScore || '--' }}</span>
-            <span class="stat-label">平均成绩</span>
-          </div>
+      <div class="header-content">
+        <div class="header-left">
+          <h2 class="page-title">学情分析</h2>
+          <p class="page-subtitle">欢迎回来，继续保持学习热情！</p>
         </div>
-        <div class="stat-card mini">
-          <div class="stat-icon orange">
-            <el-icon><Star /></el-icon>
+        <div class="header-stats">
+          <div class="header-stat">
+            <span class="stat-value">{{ totalScore || '--' }}</span>
+            <span class="stat-label">平均分</span>
           </div>
-          <div class="stat-info">
+          <div class="stat-divider"></div>
+          <div class="header-stat">
             <span class="stat-value">{{ weakPoints.length }}</span>
-            <span class="stat-label">薄弱知识点</span>
+            <span class="stat-label">薄弱点</span>
           </div>
         </div>
       </div>
@@ -37,10 +30,6 @@
             <span class="stat-value">{{ examCount || 0 }}</span>
             <span class="stat-label">考试次数</span>
           </div>
-          <div class="stat-trend up">
-            <el-icon><Top /></el-icon>
-            <span>较上周</span>
-          </div>
         </div>
       </el-col>
       <el-col :span="6">
@@ -50,11 +39,7 @@
           </div>
           <div class="stat-info">
             <span class="stat-value">{{ masteryCount || 0 }}</span>
-            <span class="stat-label">已掌握知识点</span>
-          </div>
-          <div class="stat-trend up">
-            <el-icon><Top /></el-icon>
-            <span>学习计划</span>
+            <span class="stat-label">已掌握</span>
           </div>
         </div>
       </el-col>
@@ -67,72 +52,80 @@
             <span class="stat-value">{{ completedPlans || 0 }}</span>
             <span class="stat-label">已完成计划</span>
           </div>
-          <div class="stat-trend">
-            <span>持续进步</span>
+        </div>
+      </el-col>
+      <el-col :span="6">
+        <div class="stat-card">
+          <div class="stat-icon gradient-purple">
+            <el-icon><Warning /></el-icon>
+          </div>
+          <div class="stat-info">
+            <span class="stat-value">{{ weakPoints.length }}</span>
+            <span class="stat-label">待提升</span>
           </div>
         </div>
       </el-col>
     </el-row>
 
-    <el-row :gutter="20">
-      <el-col :xs="24" :sm="24" :md="12" :lg="12">
+    <el-row :gutter="20" class="chart-row">
+      <el-col :xs="24" :sm="24" :md="12">
         <el-card class="chart-card">
           <template #header>
             <div class="card-header">
               <div class="card-title">
-                <el-icon class="card-icon orange"><DataLine /></el-icon>
+                <el-icon class="card-icon blue"><TrendCharts /></el-icon>
                 <span>成绩趋势</span>
               </div>
             </div>
           </template>
-          <div ref="trendChartRef" style="width: 100%; height: 320px;"></div>
+          <div ref="trendChartRef" style="width: 100%; height: 280px;"></div>
         </el-card>
       </el-col>
-      <el-col :xs="24" :sm="24" :md="12" :lg="12">
+      <el-col :xs="24" :sm="24" :md="12">
         <el-card class="chart-card">
           <template #header>
             <div class="card-header">
               <div class="card-title">
-                <el-icon class="card-icon blue"><Histogram /></el-icon>
+                <el-icon class="card-icon purple"><Histogram /></el-icon>
                 <span>知识点掌握度</span>
               </div>
             </div>
           </template>
-          <div ref="weakChartRef" style="width: 100%; height: 320px;"></div>
+          <div ref="weakChartRef" style="width: 100%; height: 280px;"></div>
         </el-card>
       </el-col>
     </el-row>
 
-    <el-row :gutter="20" style="margin-top: 20px;">
-      <el-col :xs="24" :sm="24" :md="12" :lg="12">
+    <el-row :gutter="20" class="chart-row">
+      <el-col :xs="24" :sm="24" :md="12">
         <el-card class="chart-card">
           <template #header>
             <div class="card-header">
               <div class="card-title">
-                <el-icon class="card-icon purple"><Odometer /></el-icon>
-                <span>学科能力雷达图</span>
+                <el-icon class="card-icon orange"><Odometer /></el-icon>
+                <span>学科能力雷达</span>
               </div>
             </div>
           </template>
-          <div ref="radarChartRef" style="width: 100%; height: 320px;"></div>
+          <div ref="radarChartRef" style="width: 100%; height: 280px;"></div>
         </el-card>
       </el-col>
-      <el-col :xs="24" :sm="24" :md="12" :lg="12">
+      <el-col :xs="24" :sm="24" :md="12">
         <el-card class="chart-card">
           <template #header>
             <div class="card-header">
               <div class="card-title">
                 <el-icon class="card-icon green"><PieChart /></el-icon>
-                <span>成绩分布</span>
+                <span>掌握度分布</span>
               </div>
             </div>
           </template>
-          <div ref="pieChartRef" style="width: 100%; height: 320px;"></div>
+          <div ref="pieChartRef" style="width: 100%; height: 280px;"></div>
         </el-card>
       </el-col>
     </el-row>
 
-    <el-row :gutter="20" style="margin-top: 20px;">
+    <el-row :gutter="20">
       <el-col :span="24">
         <el-card class="weak-card">
           <template #header>
@@ -216,7 +209,6 @@ import { useUserStore } from '@/stores/user'
 import { useThemeStore } from '@/stores/theme'
 import {
   DataLine,
-  Star,
   TrendCharts,
   CircleCheck,
   Timer,
@@ -226,8 +218,7 @@ import {
   PieChart,
   Warning,
   Loading,
-  ArrowRight,
-  Top
+  ArrowRight
 } from '@element-plus/icons-vue'
 
 const trendChartRef = ref(null)
@@ -550,10 +541,38 @@ onUnmounted(() => {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
-  padding: 20px 24px;
-  background: var(--theme-color-gradient);
+  padding: 24px 28px;
+  background: linear-gradient(135deg, var(--theme-color) 0%, var(--theme-color-dark) 100%);
   border-radius: 16px;
   color: #fff;
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.header-stats {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  background: rgba(255, 255, 255, 0.15);
+  padding: 12px 24px;
+  border-radius: 12px;
+}
+
+.header-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.stat-divider {
+  width: 1px;
+  height: 32px;
+  background: rgba(255, 255, 255, 0.3);
 }
 
 .page-title {
@@ -568,24 +587,17 @@ onUnmounted(() => {
   opacity: 0.9;
 }
 
-.header-right {
-  display: flex;
-  gap: 16px;
+.stat-value {
+  font-size: 24px;
+  font-weight: 700;
+  color: #fff;
 }
 
-.stat-card.mini {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  background: rgba(255, 255, 255, 0.2);
-  padding: 12px 16px;
-  border-radius: 12px;
+.stat-label {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.8);
+  margin-top: 2px;
 }
-
-.stat-icon.blue { background: var(--theme-color-light); color: var(--theme-color); }
-.stat-icon.orange { background: rgba(144, 156, 240, 0.2); color: #909CF0; }
-.stat-icon.green { background: var(--theme-color-light); color: var(--theme-color); }
-.stat-icon.purple { background: rgba(147, 112, 219, 0.2); color: #9370DB; }
 
 .stats-row {
   margin-bottom: 20px;
@@ -641,19 +653,8 @@ onUnmounted(() => {
   margin-top: 2px;
 }
 
-.stat-trend {
-  position: absolute;
-  top: 16px;
-  right: 16px;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 12px;
-  color: var(--theme-color);
-}
-
-.stat-trend.up {
-  color: var(--theme-color);
+.chart-row {
+  margin-bottom: 20px;
 }
 
 .chart-card, .weak-card {
@@ -694,7 +695,7 @@ onUnmounted(() => {
   font-size: 18px;
 }
 
-.card-icon.orange { background: rgba(144, 156, 240, 0.1); color: #909CF0; }
+.card-icon.orange { background: rgba(230, 162, 60, 0.1); color: #E6A23C; }
 .card-icon.blue { background: var(--theme-color-light); color: var(--theme-color); }
 .card-icon.purple { background: rgba(147, 112, 219, 0.1); color: #9370DB; }
 .card-icon.green { background: var(--theme-color-light); color: var(--theme-color); }

@@ -259,6 +259,7 @@ public class TeacherServiceImpl implements TeacherService {
 
     /**
      * 根据年级获取学生列表
+     * 如果grade为空，返回所有学生（供未设置年级的教师使用）
      */
     private List<User> getStudentsByGrade(String grade) {
         LambdaQueryWrapper<User> wrapper = new LambdaQueryWrapper<>();
@@ -266,6 +267,8 @@ public class TeacherServiceImpl implements TeacherService {
         if (grade != null && !grade.isBlank()) {
             wrapper.eq(User::getGrade, grade);
         }
+        // 如果教师设置了年级，只返回同年级的学生
+        // 如果教师未设置年级，返回所有学生
         wrapper.orderByAsc(User::getName);
         return userMapper.selectList(wrapper);
     }
@@ -489,5 +492,30 @@ public class TeacherServiceImpl implements TeacherService {
         stats.put("notesCount", notesCount);
 
         return stats;
+    }
+
+    @Override
+    public void savePlan(Plan plan) {
+        if (plan.getId() != null) {
+            // 更新
+            Plan existing = planMapper.selectById(plan.getId());
+            if (existing != null) {
+                existing.setContent(plan.getContent());
+                existing.setSubject(plan.getSubject());
+                existing.setStartDate(plan.getStartDate());
+                existing.setEndDate(plan.getEndDate());
+                existing.setProgress(plan.getProgress());
+                existing.setStatus(plan.getStatus());
+                existing.setDescription(plan.getDescription());
+                planMapper.updateById(existing);
+                log.info("[TeacherService] 更新学习计划成功，planId={}", plan.getId());
+            }
+        } else {
+            // 新建
+            plan.setCreateTime(new Date());
+            plan.setUpdateTime(new Date());
+            planMapper.insert(plan);
+            log.info("[TeacherService] 新建学习计划成功，planId={}", plan.getId());
+        }
     }
 }

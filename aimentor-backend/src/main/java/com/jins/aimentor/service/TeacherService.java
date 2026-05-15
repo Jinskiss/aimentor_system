@@ -126,4 +126,11 @@ public interface TeacherService {
      * @return 统计信息
      */
     Map<String, Object> getTeacherStats(Long teacherId);
+
+    /**
+     * 保存学习计划（新建或更新）
+     *
+     * @param plan 学习计划
+     */
+    void savePlan(Plan plan);
 }

@@ -250,4 +250,30 @@ public class TeacherController {
         log.info("[TeacherController] 获取教师统计信息，teacherId={}", teacher.getId());
         return Result.success(teacherService.getTeacherStats(teacher.getId()));
     }
+
+    /**
+     * 保存学习计划（新建或更新）
+     */
+    @ApiOperation("保存学习计划")
+    @PostMapping("/plan")
+    public Result<Void> savePlan(@RequestBody Plan plan) {
+        User teacher = UserHolder.getUser();
+        if (teacher == null) {
+            return Result.error(Status.CODE_401, "用户未登录");
+        }
+        if (!"teacher".equals(teacher.getRole())) {
+            return Result.error(Status.CODE_403, "仅限教师账号访问");
+        }
+        // 检查权限：只有教师所在年级的学生才能分配计划
+        if (plan.getStudentId() == null) {
+            return Result.error(Status.CODE_400, "学生ID不能为空");
+        }
+        if (!teacherService.canViewStudent(teacher.getId(), plan.getStudentId())) {
+            return Result.error(Status.CODE_403, "无权为该学生创建计划");
+        }
+        log.info("[TeacherController] 保存学习计划，teacherId={}, studentId={}, planId={}",
+                teacher.getId(), plan.getStudentId(), plan.getId());
+        teacherService.savePlan(plan);
+        return Result.success();
+    }
 }

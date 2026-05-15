@@ -51,7 +51,7 @@ public class PlanServiceImpl implements PlanService {
         plan.setContent(planContent);
         plan.setStartDate(LocalDate.now());
         plan.setEndDate(LocalDate.now().plusDays(dto.getDays()));
-        plan.setStatus("未完成");
+        plan.setStatus("进行中");
 
         // 保存到数据库
         planMapper.insert(plan);

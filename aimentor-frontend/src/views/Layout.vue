@@ -29,35 +29,35 @@
       >
         <!-- ===== 学生菜单 ===== -->
         <template v-if="currentRole === 'student'">
-          <el-menu-item index="/dashboard">
+          <el-menu-item index="dashboard">
             <el-icon><DataLine /></el-icon>
             <template #title>学情分析</template>
           </el-menu-item>
-          <el-menu-item index="/record-manage">
+          <el-menu-item index="record-manage">
             <el-icon><Edit /></el-icon>
             <template #title>学情记录</template>
           </el-menu-item>
-          <el-menu-item index="/plan">
+          <el-menu-item index="plan">
             <el-icon><Calendar /></el-icon>
             <template #title>学习计划</template>
           </el-menu-item>
-          <el-menu-item index="/qa">
+          <el-menu-item index="qa">
             <el-icon><ChatDotRound /></el-icon>
             <template #title>AI问答</template>
           </el-menu-item>
-          <el-menu-item index="/resource">
+          <el-menu-item index="resource">
             <el-icon><Collection /></el-icon>
             <template #title>资源推荐</template>
           </el-menu-item>
-          <el-menu-item index="/notes">
+          <el-menu-item index="notes">
             <el-icon><Notebook /></el-icon>
             <template #title>学习笔记</template>
           </el-menu-item>
-          <el-menu-item index="/profile">
+          <el-menu-item index="profile">
             <el-icon><User /></el-icon>
             <template #title>个人中心</template>
           </el-menu-item>
-          <el-menu-item index="/settings">
+          <el-menu-item index="settings">
             <el-icon><Setting /></el-icon>
             <template #title>设置</template>
           </el-menu-item>
@@ -306,16 +306,16 @@ watch(
 // 菜单激活路径计算逻辑（菜单 index 不带前导斜杠，路由路径带斜杠）
 function getMenuActivePath(path) {
   if (path.startsWith('/resource/')) return 'resource'
-  // 先判断最具体的路径
+  // 先判断最具体的路径（精确匹配放前面）
   if (path.startsWith('/teacher/student/')) return 'teacher/students'
-  if (path === '/teacher/profile') return 'teacher/profile'
   if (path === '/teacher/dashboard') return 'teacher/dashboard'
   if (path === '/teacher/students') return 'teacher/students'
+  if (path === '/teacher/profile') return 'teacher/profile'
   if (path === '/teacher/plan') return 'teacher/plan'
   if (path === '/teacher/resource') return 'teacher/resource'
   if (path === '/teacher/notes') return 'teacher/notes'
   if (path === '/teacher/ai') return 'teacher/ai'
-  if (path.startsWith('/admin/')) return 'admin/dashboard'
+  if (path === '/admin/dashboard') return 'admin/dashboard'
   if (path === '/admin/users') return 'admin/users'
   if (path === '/admin/logs') return 'admin/logs'
   if (path === '/admin/profile') return 'admin/profile'
@@ -326,7 +326,7 @@ function getMenuActivePath(path) {
 
 const menuActivePath = computed(() => activeIndex.value)
 
-// 处理菜单点击（菜单 index 不带斜杠，路由需要带斜杠）
+// 处理菜单点击
 const handleMenuSelect = (index) => {
   router.push('/' + index)
 }
