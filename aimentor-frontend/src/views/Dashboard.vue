@@ -334,20 +334,28 @@ const initWeakChart = (data) => {
 
   weakChart = echarts.init(weakChartRef.value)
 
-  const barData = data.map(item => ({
-    value: item.mastery,
-    itemStyle: { color: item.mastery < 60 ? '#909CF0' : 'var(--theme-color)' }
-  }))
+  // 限制显示数量
+  const displayData = data.slice(0, 8)
 
   const option = {
     title: { text: '知识点掌握度', left: 'center', top: 10 },
-    tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' }, formatter: '{b}<br/>掌握度: {c}%' },
-    grid: { left: '3%', right: '4%', bottom: '3%', top: '15%', containLabel: true },
+    tooltip: {
+      trigger: 'item',
+      axisPointer: { type: 'shadow' },
+      position: function (point, params, dom, rect, size) {
+        // 放在鼠标右侧，避免遮挡柱子
+        return [point[0] + 20, point[1] - 30]
+      },
+      formatter: (params) => {
+        return `<div style="padding:4px 8px">${params.name}<br/>掌握度: <strong>${params.value}%</strong></div>`
+      }
+    },
+    grid: { left: '3%', right: '4%', bottom: '3%', top: '18%', containLabel: true },
     xAxis: {
       type: 'category',
-      data: data.map(item => item.knowledge),
+      data: displayData.map(item => item.knowledge),
       axisLine: { lineStyle: { color: '#999' } },
-      axisLabel: { interval: 0, rotate: data.length > 5 ? 30 : 0 }
+      axisLabel: { interval: 0, rotate: displayData.length > 5 ? 25 : 0, fontSize: 11 }
     },
     yAxis: {
       type: 'value',
@@ -356,10 +364,16 @@ const initWeakChart = (data) => {
       splitLine: { lineStyle: { color: '#eee' } }
     },
     series: [{
-      data: barData,
+      data: displayData.map(item => ({
+        value: item.mastery,
+        itemStyle: { color: item.mastery < 60 ? '#909CF0' : 'var(--theme-color)' }
+      })),
       type: 'bar',
       barWidth: '50%',
-      label: { show: true, position: 'top', formatter: '{c}%' }
+      emphasis: {
+        disabled: true
+      },
+      label: { show: true, position: 'top', formatter: '{c}%', fontSize: 11 }
     }]
   }
 
@@ -431,14 +445,16 @@ const initPieChart = (data) => {
       itemStyle: { borderRadius: 10, borderColor: '#fff', borderWidth: 2 },
       label: { show: false, position: 'center' },
       emphasis: {
-        label: { show: true, fontSize: 16, fontWeight: 'bold' }
+        scale: true,
+        scaleSize: 10,
+        label: { show: true, fontSize: 14, fontWeight: 'bold' }
       },
       labelLine: { show: false },
       data: [
-        { value: excellent, name: '优秀(>=80)', itemStyle: { color: 'var(--theme-color)' } },
-        { value: good, name: '良好(60-80)', itemStyle: { color: 'var(--theme-color)' } },
-        { value: fair, name: '一般(30-60)', itemStyle: { color: '#909CF0' } },
-        { value: poor, name: '薄弱(<30)', itemStyle: { color: '#B4A0F0' } }
+        { value: excellent, name: '优秀(>=80)', itemStyle: { color: '#409EFF' } },
+        { value: good, name: '良好(60-80)', itemStyle: { color: '#67C23A' } },
+        { value: fair, name: '一般(30-60)', itemStyle: { color: '#E6A23C' } },
+        { value: poor, name: '薄弱(<30)', itemStyle: { color: '#909CF0' } }
       ]
     }]
   }

@@ -19,13 +19,13 @@
       <!-- 导航菜单 -->
       <el-menu
         :default-active="menuActivePath"
-        router
         class="el-menu-vertical"
         :collapse="isCollapse"
         :collapse-transition="false"
         background-color="#1a1a2e"
         text-color="#a0a0b0"
         active-text-color="var(--theme-color)"
+        @select="handleMenuSelect"
       >
         <!-- ===== 学生菜单 ===== -->
         <template v-if="currentRole === 'student'">
@@ -65,35 +65,35 @@
 
         <!-- ===== 教师菜单 ===== -->
         <template v-else-if="currentRole === 'teacher'">
-          <el-menu-item index="/teacher/dashboard">
+          <el-menu-item index="teacher/dashboard">
             <el-icon><DataLine /></el-icon>
             <template #title>教师首页</template>
           </el-menu-item>
-          <el-menu-item index="/teacher/students">
+          <el-menu-item index="teacher/students">
             <el-icon><User /></el-icon>
             <template #title>学生管理</template>
           </el-menu-item>
-          <el-menu-item index="/teacher/plan">
+          <el-menu-item index="teacher/plan">
             <el-icon><Calendar /></el-icon>
             <template #title>班级计划</template>
           </el-menu-item>
-          <el-menu-item index="/teacher/resource">
+          <el-menu-item index="teacher/resource">
             <el-icon><Collection /></el-icon>
             <template #title>班级资源</template>
           </el-menu-item>
-          <el-menu-item index="/teacher/notes">
+          <el-menu-item index="teacher/notes">
             <el-icon><Notebook /></el-icon>
             <template #title>班级笔记</template>
           </el-menu-item>
-          <el-menu-item index="/teacher/ai">
+          <el-menu-item index="teacher/ai">
             <el-icon><ChatDotRound /></el-icon>
             <template #title>AI分析助手</template>
           </el-menu-item>
-          <el-menu-item index="/teacher/profile">
+          <el-menu-item index="teacher/profile">
             <el-icon><User /></el-icon>
             <template #title>个人中心</template>
           </el-menu-item>
-          <el-menu-item index="/settings">
+          <el-menu-item index="settings">
             <el-icon><Setting /></el-icon>
             <template #title>设置</template>
           </el-menu-item>
@@ -101,23 +101,23 @@
 
         <!-- ===== 管理员菜单 ===== -->
         <template v-else-if="currentRole === 'admin'">
-          <el-menu-item index="/admin/dashboard">
+          <el-menu-item index="admin/dashboard">
             <el-icon><DataLine /></el-icon>
             <template #title>管理首页</template>
           </el-menu-item>
-          <el-menu-item index="/admin/users">
+          <el-menu-item index="admin/users">
             <el-icon><User /></el-icon>
             <template #title>用户管理</template>
           </el-menu-item>
-          <el-menu-item index="/admin/logs">
+          <el-menu-item index="admin/logs">
             <el-icon><Document /></el-icon>
             <template #title>日志管理</template>
           </el-menu-item>
-          <el-menu-item index="/profile">
+          <el-menu-item index="admin/profile">
             <el-icon><UserFilled /></el-icon>
             <template #title>个人中心</template>
           </el-menu-item>
-          <el-menu-item index="/settings">
+          <el-menu-item index="settings">
             <el-icon><Setting /></el-icon>
             <template #title>设置</template>
           </el-menu-item>
@@ -125,7 +125,7 @@
       </el-menu>
 
       <!-- 折叠按钮 -->
-      <div class="collapse-btn" @click="isCollapse = !isCollapse">
+      <div class="collapse-btn" @click="toggleSidebar">
         <el-icon v-if="isCollapse"><DArrowRight /></el-icon>
         <el-icon v-else><DArrowLeft /></el-icon>
         <span v-if="!isCollapse">收起</span>
@@ -139,7 +139,7 @@
         <div class="header-left">
           <div class="breadcrumb">
             <el-breadcrumb separator="/">
-              <el-breadcrumb-item :to="{ path: '/dashboard' }">首页</el-breadcrumb-item>
+              <el-breadcrumb-item :to="{ path: currentRole === 'teacher' ? '/teacher/dashboard' : currentRole === 'admin' ? '/admin/dashboard' : '/dashboard' }">首页</el-breadcrumb-item>
               <el-breadcrumb-item>{{ currentPageName }}</el-breadcrumb-item>
             </el-breadcrumb>
           </div>
@@ -224,8 +224,9 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useUserStore } from '@/stores/user'
+import { useThemeStore } from '@/stores/theme'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
@@ -248,10 +249,23 @@ import {
 } from '@element-plus/icons-vue'
 
 const userStore = useUserStore()
+const themeStore = useThemeStore()
 const router = useRouter()
 const route = useRoute()
 
-const isCollapse = ref(false)
+// 侧边栏折叠状态从 themeStore 同步
+const isCollapse = ref(themeStore.sidebarCollapsed)
+
+// 监听 themeStore 变化，保持同步
+watch(() => themeStore.sidebarCollapsed, (val) => {
+  isCollapse.value = val
+})
+
+// 切换侧边栏
+const toggleSidebar = () => {
+  isCollapse.value = !isCollapse.value
+  themeStore.setSidebarCollapsed(isCollapse.value)
+}
 
 const notifications = ref([
   { id: 1, type: 'success', icon: 'CircleCheck', text: '恭喜！你的学习计划「数学7天」已完成', time: '10分钟前', read: false, link: '/plan' },
@@ -267,40 +281,68 @@ const handleNotifClick = (item) => {
 }
 
 const userRole = computed(() => {
-  const role = userStore.userInfo?.role
+  // 优先从 userStore.userInfo 获取，否则从 localStorage 获取
+  const role = userStore.userInfo?.role || localStorage.getItem('userRole')
   const roleMap = { student: '学生', teacher: '教师', admin: '管理员' }
   return roleMap[role] || '学生'
 })
 
 const currentRole = computed(() => {
-  return userStore.userInfo?.role || 'student'
+  // 优先从 userStore 获取，如果为空则从 localStorage 获取
+  return userStore.userInfo?.role || localStorage.getItem('userRole') || 'student'
 })
 
-const menuActivePath = computed(() => {
-  const p = route.path
-  if (p.startsWith('/resource/')) return '/resource'
-  if (p.startsWith('/teacher/student/')) return '/teacher/students'
-  if (p.startsWith('/teacher/students')) return '/teacher/students'
-  if (p.startsWith('/teacher/plan')) return '/teacher/plan'
-  if (p.startsWith('/teacher/resource')) return '/teacher/resource'
-  if (p.startsWith('/teacher/notes')) return '/teacher/notes'
-  if (p.startsWith('/teacher/ai')) return '/teacher/ai'
-  if (p.startsWith('/teacher/')) return '/teacher/dashboard'
-  if (p.startsWith('/admin/users')) return '/admin/users'
-  if (p.startsWith('/admin/resources')) return '/admin/resources'
-  if (p.startsWith('/admin/')) return '/admin/dashboard'
-  return p
-})
+// 当前激活的菜单路径（不带前导斜杠，与菜单 index 对应）
+const activeIndex = ref('')
+
+watch(
+  () => route.path,
+  (newPath) => {
+    activeIndex.value = getMenuActivePath(newPath)
+  },
+  { immediate: true }
+)
+
+// 菜单激活路径计算逻辑（菜单 index 不带前导斜杠，路由路径带斜杠）
+function getMenuActivePath(path) {
+  if (path.startsWith('/resource/')) return 'resource'
+  // 先判断最具体的路径
+  if (path.startsWith('/teacher/student/')) return 'teacher/students'
+  if (path === '/teacher/profile') return 'teacher/profile'
+  if (path === '/teacher/dashboard') return 'teacher/dashboard'
+  if (path === '/teacher/students') return 'teacher/students'
+  if (path === '/teacher/plan') return 'teacher/plan'
+  if (path === '/teacher/resource') return 'teacher/resource'
+  if (path === '/teacher/notes') return 'teacher/notes'
+  if (path === '/teacher/ai') return 'teacher/ai'
+  if (path.startsWith('/admin/')) return 'admin/dashboard'
+  if (path === '/admin/users') return 'admin/users'
+  if (path === '/admin/logs') return 'admin/logs'
+  if (path === '/admin/profile') return 'admin/profile'
+  if (path === '/admin/resources') return 'admin/resources'
+  // 学生路由不带前缀
+  return path.replace(/^\//, '')
+}
+
+const menuActivePath = computed(() => activeIndex.value)
+
+// 处理菜单点击（菜单 index 不带斜杠，路由需要带斜杠）
+const handleMenuSelect = (index) => {
+  router.push('/' + index)
+}
 
 const currentPageName = computed(() => {
   if (route.name === 'ResourceDetail') return '资源详情'
+  if (route.name === 'TeacherProfile') return '个人中心'
+  if (route.name === 'TeacherStudentDetail') return '学生学情详情'
   if (route.path === '/teacher/dashboard') return '教师首页'
   if (route.path === '/teacher/students') return '学生学情'
   if (route.path === '/teacher/plan') return '班级计划'
-  if (route.path === '/teacher/resource') return '学习资料'
+  if (route.path === '/teacher/resource') return '班级资源'
   if (route.path === '/teacher/notes') return '班级笔记'
   if (route.path === '/teacher/ai') return 'AI分析助手'
-  if (route.name === 'TeacherStudentDetail') return '学生学情详情'
+  if (route.path === '/teacher/profile') return '个人中心'
+  if (route.path === '/admin/profile') return '个人中心'
   if (route.path === '/admin/dashboard') return '管理首页'
   if (route.path === '/admin/users') return '用户管理'
   if (route.path === '/admin/resources') return '资源管理'
@@ -318,8 +360,9 @@ const currentPageName = computed(() => {
 })
 
 const handleCommand = (command) => {
+  const role = currentRole.value
   switch (command) {
-    case 'profile': router.push('/profile'); break
+    case 'profile': router.push(role === 'teacher' ? '/teacher/profile' : role === 'admin' ? '/admin/profile' : '/profile'); break
     case 'settings': router.push('/settings'); break
     case 'logout': handleLogout(); break
   }

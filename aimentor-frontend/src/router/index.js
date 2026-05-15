@@ -153,6 +153,18 @@ const routes = [
         name: 'AdminLogs',
         component: () => import('@/views/AdminLogs.vue'),
         meta: { title: '日志管理', roles: ['admin'] }
+      },
+      {
+        path: 'admin/profile',
+        name: 'AdminProfile',
+        component: () => import('@/views/AdminProfile.vue'),
+        meta: { title: '个人中心', roles: ['admin'] }
+      },
+      {
+        path: 'admin/resources',
+        name: 'AdminResources',
+        component: () => import('@/views/AdminResources.vue'),
+        meta: { title: '资源管理', roles: ['admin'] }
       }
     ]
   }

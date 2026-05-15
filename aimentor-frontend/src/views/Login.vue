@@ -133,12 +133,32 @@ const handleLogin = async () => {
     }
     const result = await userStore.login(loginData)
     console.log('登录结果:', result)
+    console.log('userStore.userInfo after login:', userStore.userInfo)
+    console.log('userStore.userInfo.role:', userStore.userInfo?.role)
 
     if (result && userStore.isLoggedIn) {
       ElMessage.success('登录成功')
 
-      const role = userStore.userInfo?.role || 'student'
-      const targetPath = role === 'teacher' ? '/teacher/dashboard' : role === 'admin' ? '/admin/dashboard' : '/dashboard'
+      // 确保获取到用户信息
+      let role = userStore.userInfo?.role
+      if (!role) {
+        // 如果 userInfo 为空，强制重新获取
+        console.log('userInfo.role 为空，强制重新获取...')
+        try {
+          await userStore.fetchUserInfo()
+          role = userStore.userInfo?.role
+          console.log('重新获取后 role:', role)
+        } catch (e) {
+          console.warn('获取用户信息失败:', e)
+        }
+      }
+
+      // 使用默认值 'student' 作为最终保障
+      const finalRole = role || 'student'
+      localStorage.setItem('userRole', finalRole)
+      console.log('最终用户角色:', finalRole)
+
+      const targetPath = finalRole === 'teacher' ? '/teacher/dashboard' : finalRole === 'admin' ? '/admin/dashboard' : '/dashboard'
       console.log('准备跳转', targetPath)
       await router.replace(targetPath)
       console.log('跳转完成')

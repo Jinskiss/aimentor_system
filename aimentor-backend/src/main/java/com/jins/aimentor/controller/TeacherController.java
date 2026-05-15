@@ -233,4 +233,21 @@ public class TeacherController {
         List<Map<String, Object>> plans = teacherService.getAllStudentPlans(subject, studentId);
         return Result.success(plans);
     }
+
+    /**
+     * 获取教师统计信息
+     */
+    @ApiOperation("获取教师统计信息")
+    @GetMapping("/stats")
+    public Result<Map<String, Object>> getTeacherStats() {
+        User teacher = UserHolder.getUser();
+        if (teacher == null) {
+            return Result.error(Status.CODE_401, "用户未登录");
+        }
+        if (!"teacher".equals(teacher.getRole())) {
+            return Result.error(Status.CODE_403, "仅限教师账号访问");
+        }
+        log.info("[TeacherController] 获取教师统计信息，teacherId={}", teacher.getId());
+        return Result.success(teacherService.getTeacherStats(teacher.getId()));
+    }
 }

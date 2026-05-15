@@ -120,4 +120,10 @@ public interface TeacherService {
      * @return 包含学生信息的计划列表
      */
     List<Map<String, Object>> getAllStudentPlans(String subject, Long studentId);
+    /**
+     * 获取教师统计信息（学生数、资源数、计划数、笔记数）
+     *
+     * @return 统计信息
+     */
+    Map<String, Object> getTeacherStats(Long teacherId);
 }

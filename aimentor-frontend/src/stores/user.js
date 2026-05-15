@@ -22,6 +22,11 @@ export const useUserStore = defineStore('user', () => {
 
   const username = computed(() => userInfo.value?.name || '')
 
+  // 获取用户角色（优先从 userInfo 获取，否则从 localStorage）
+  const role = computed(() => {
+    return userInfo.value?.role || localStorage.getItem('userRole') || 'student'
+  })
+
   // Actions
   /**
    * 登录
@@ -119,6 +124,7 @@ export const useUserStore = defineStore('user', () => {
     token,
     userInfo,
     userInfoLoaded,
+    role,
     isLoggedIn,
     username,
     login,

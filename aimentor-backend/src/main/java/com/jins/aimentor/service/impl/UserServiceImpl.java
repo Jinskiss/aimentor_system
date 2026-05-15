@@ -347,25 +347,28 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Override
     @Transactional
     public boolean changePassword(Long userId, String oldPassword, String newPassword) {
-        log.info("修改密码，userId: {}", userId);
+        log.info("修改密码，userId: {}, 输入旧密码: [{}], 新密码: [{}]", userId, oldPassword, newPassword);
 
         User user = userMapper.selectById(userId);
         if (user == null) {
+            log.error("用户不存在，userId: {}", userId);
             throw new BizException(Status.CODE_404, "用户不存在");
         }
 
-        // 验证旧密码
+        // 验证旧密码（去空格后比较）
         String storedPassword = user.getPassword();
-        if (storedPassword == null || !storedPassword.equals(oldPassword)) {
-            log.warn("旧密码错误，userId: {}", userId);
+        log.info("数据库存储的密码: [{}], 长度: {}", storedPassword, storedPassword != null ? storedPassword.length() : 0);
+        if (storedPassword == null || !storedPassword.trim().equals(oldPassword.trim())) {
+            log.warn("旧密码错误，userId: {}, 输入: [{}], 存储: [{}]", userId, oldPassword, storedPassword);
             return false;
         }
 
-        // 更新新密码
+        // 更新新密码（去空格后存储）
         User update = new User();
         update.setId(userId);
-        update.setPassword(newPassword);
+        update.setPassword(newPassword.trim());
         userMapper.updateById(update);
+        log.info("密码修改成功，userId: {}", userId);
 
         // 更新ThreadLocal中的用户信息
         user.setPassword(newPassword);

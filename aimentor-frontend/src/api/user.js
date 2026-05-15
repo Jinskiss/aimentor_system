@@ -86,3 +86,41 @@ export const updateAvatar = (avatar) => {
     data: { avatar }
   })
 }
+
+/**
+ * 发送邮箱验证码
+ * @param {string} email 邮箱地址
+ */
+export const sendEmailCode = (email) => {
+  return request({
+    url: '/user/sendEmailCode',
+    method: 'post',
+    data: { email }
+  })
+}
+
+/**
+ * 验证邮箱验证码并更新邮箱
+ * @param {string} email 邮箱地址
+ * @param {string} code 验证码
+ */
+export const verifyEmailCode = (email, code) => {
+  return request({
+    url: '/user/verifyEmailCode',
+    method: 'post',
+    data: { email, code }
+  })
+}
+
+/**
+ * 修改密码
+ * @param {string} oldPassword 旧密码
+ * @param {string} newPassword 新密码
+ */
+export const changePassword = (oldPassword, newPassword) => {
+  return request({
+    url: '/user/changePassword',
+    method: 'put',
+    data: { oldPassword, newPassword }
+  })
+}

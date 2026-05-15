@@ -4,12 +4,14 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.jins.aimentor.domain.entity.KnowledgeMastery;
 import com.jins.aimentor.domain.entity.Note;
 import com.jins.aimentor.domain.entity.Plan;
+import com.jins.aimentor.domain.entity.Resource;
 import com.jins.aimentor.domain.entity.ScoreRecord;
 import com.jins.aimentor.domain.entity.User;
 import com.jins.aimentor.domain.vo.*;
 import com.jins.aimentor.mapper.KnowledgeMasteryMapper;
 import com.jins.aimentor.mapper.NoteMapper;
 import com.jins.aimentor.mapper.PlanMapper;
+import com.jins.aimentor.mapper.ResourceMapper;
 import com.jins.aimentor.mapper.ScoreRecordMapper;
 import com.jins.aimentor.mapper.UserMapper;
 import com.jins.aimentor.service.TeacherService;
@@ -37,6 +39,7 @@ public class TeacherServiceImpl implements TeacherService {
     private final KnowledgeMasteryMapper knowledgeMasteryMapper;
     private final NoteMapper noteMapper;
     private final PlanMapper planMapper;
+    private final ResourceMapper resourceMapper;
 
     @Override
     public TeacherDashboardVO getDashboardData(Long teacherId) {
@@ -432,5 +435,59 @@ public class TeacherServiceImpl implements TeacherService {
             map.put("studentName", student != null ? student.getName() : "未知");
             return map;
         }).collect(Collectors.toList());
+    }
+
+    @Override
+    public Map<String, Object> getTeacherStats(Long teacherId) {
+        log.info("[TeacherService] 获取教师统计信息，teacherId={}", teacherId);
+        User teacher = userMapper.selectById(teacherId);
+        if (teacher == null) {
+            return new HashMap<>();
+        }
+        String grade = teacher.getGrade();
+
+        Map<String, Object> stats = new HashMap<>();
+
+        // 学生总数
+        LambdaQueryWrapper<User> studentWrapper = new LambdaQueryWrapper<>();
+        studentWrapper.eq(User::getRole, "student");
+        if (grade != null && !grade.isBlank()) {
+            studentWrapper.eq(User::getGrade, grade);
+        }
+        long studentCount = userMapper.selectCount(studentWrapper);
+        stats.put("studentCount", studentCount);
+
+        // 资源数（按年级筛选，如果有的话）
+        LambdaQueryWrapper<Resource> resourceWrapper = new LambdaQueryWrapper<>();
+        if (grade != null && !grade.isBlank()) {
+            resourceWrapper.eq(Resource::getSubject, grade);
+        }
+        long resourceCount = resourceMapper.selectCount(resourceWrapper);
+        stats.put("resourceCount", resourceCount);
+
+        // 计划数（该年级学生创建的）
+        List<Long> studentIds = new ArrayList<>();
+        if (studentCount > 0) {
+            List<User> students = userMapper.selectList(studentWrapper);
+            studentIds = students.stream().map(User::getId).collect(Collectors.toList());
+        }
+        long planCount = 0;
+        if (!studentIds.isEmpty()) {
+            LambdaQueryWrapper<Plan> planWrapper = new LambdaQueryWrapper<>();
+            planWrapper.in(Plan::getStudentId, studentIds);
+            planCount = planMapper.selectCount(planWrapper);
+        }
+        stats.put("planCount", planCount);
+
+        // 笔记数（该年级学生创建的）
+        long notesCount = 0;
+        if (!studentIds.isEmpty()) {
+            LambdaQueryWrapper<Note> noteWrapper = new LambdaQueryWrapper<>();
+            noteWrapper.in(Note::getUserId, studentIds);
+            notesCount = noteMapper.selectCount(noteWrapper);
+        }
+        stats.put("notesCount", notesCount);
+
+        return stats;
     }
 }
