@@ -285,4 +285,98 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         userMapper.updateById(update);
         log.info("[UserService] 更新头像完成，userId: {}, avatar: {}", userId, avatar);
     }
+
+    /**
+     * 发送邮箱验证码
+     */
+    @Override
+    public String sendEmailCode(String email) {
+        log.info("发送邮箱验证码，邮箱: {}", email);
+
+        if (!StringUtils.hasText(email)) {
+            throw new BizException(Status.CODE_400, "邮箱不能为空");
+        }
+
+        // 生成六位数验证码
+        Random random = new Random();
+        int code = 100000 + random.nextInt(900000);
+        String verificationCode = String.valueOf(code);
+
+        // 存储验证码
+        CODE_STORE.put("email:" + email, verificationCode);
+        log.info("邮箱验证码已生成: {}，有效期{}秒，请查收邮件: {}", verificationCode, CODE_EXPIRE_SECONDS, email);
+
+        // TODO: 接入真实邮件服务发送邮件
+        // 这里只打印日志，生产环境应该调用邮件服务发送
+
+        // 模拟返回验证码（实际生产环境不应该返回）
+        return verificationCode;
+    }
+
+    /**
+     * 验证邮箱验证码
+     */
+    @Override
+    public boolean verifyEmailCode(String email, String code) {
+        log.info("验证邮箱验证码，邮箱: {}, 输入的验证码: {}", email, code);
+
+        if (!StringUtils.hasText(email) || !StringUtils.hasText(code)) {
+            return false;
+        }
+
+        String storedCode = CODE_STORE.get("email:" + email);
+        if (storedCode == null) {
+            log.warn("邮箱验证码不存在或已过期: {}", email);
+            return false;
+        }
+
+        boolean isValid = storedCode.equals(code);
+        if (isValid) {
+            CODE_STORE.remove("email:" + email);
+            log.info("邮箱验证码验证成功");
+        } else {
+            log.warn("邮箱验证码错误，输入: {}，存储: {}", code, storedCode);
+        }
+
+        return isValid;
+    }
+
+    /**
+     * 修改密码
+     */
+    @Override
+    @Transactional
+    public boolean changePassword(Long userId, String oldPassword, String newPassword) {
+        log.info("修改密码，userId: {}", userId);
+
+        User user = userMapper.selectById(userId);
+        if (user == null) {
+            throw new BizException(Status.CODE_404, "用户不存在");
+        }
+
+        // 验证旧密码
+        String storedPassword = user.getPassword();
+        if (storedPassword == null || !storedPassword.equals(oldPassword)) {
+            log.warn("旧密码错误，userId: {}", userId);
+            return false;
+        }
+
+        // 更新新密码
+        User update = new User();
+        update.setId(userId);
+        update.setPassword(newPassword);
+        userMapper.updateById(update);
+
+        // 更新ThreadLocal中的用户信息
+        user.setPassword(newPassword);
+        UserHolder.saveUser(user);
+
+        // 更新Redis中的用户信息
+        String token = TokenUtils.genToken(user.getId().toString(), user.getUsername());
+        redisTemplate.opsForValue().set(RedisConstants.USER_TOKEN_KEY + token, user);
+        redisTemplate.expire(RedisConstants.USER_TOKEN_KEY + token, RedisConstants.USER_TOKEN_TTL, TimeUnit.MINUTES);
+
+        log.info("密码修改成功，userId: {}", userId);
+        return true;
+    }
 }

@@ -57,4 +57,28 @@ public interface UserService extends IService<User> {
      * @param avatar 头像URL
      */
     void updateAvatar(Long userId, String avatar);
+
+    /**
+     * 发送邮箱验证码
+     * @param email 邮箱地址
+     * @return 验证码
+     */
+    String sendEmailCode(String email);
+
+    /**
+     * 验证邮箱验证码
+     * @param email 邮箱
+     * @param code 验证码
+     * @return 是否验证通过
+     */
+    boolean verifyEmailCode(String email, String code);
+
+    /**
+     * 修改密码
+     * @param userId 用户ID
+     * @param oldPassword 旧密码
+     * @param newPassword 新密码
+     * @return 是否修改成功
+     */
+    boolean changePassword(Long userId, String oldPassword, String newPassword);
 }

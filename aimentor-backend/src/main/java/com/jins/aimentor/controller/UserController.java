@@ -128,4 +128,76 @@ public class UserController {
         log.info("[UserController] 更新头像，userId={}, avatar={}", current.getId(), avatarUrl);
         return Result.success(null);
     }
+
+    /**
+     * 发送邮箱验证码
+     */
+    @ApiOperation("发送邮箱验证码")
+    @PostMapping("/sendEmailCode")
+    public Result<String> sendEmailCode(@RequestBody java.util.Map<String, String> body) {
+        String email = body.get("email");
+        log.info("发送邮箱验证码，邮箱: {}", email);
+
+        String code = userService.sendEmailCode(email);
+        return Result.success(code);
+    }
+
+    /**
+     * 验证邮箱验证码并更新邮箱
+     */
+    @ApiOperation("验证邮箱验证码并更新邮箱")
+    @PostMapping("/verifyEmailCode")
+    public Result<Void> verifyEmailCode(@RequestBody java.util.Map<String, String> body) {
+        String email = body.get("email");
+        String code = body.get("code");
+        log.info("验证邮箱验证码，邮箱: {}", email);
+
+        if (!userService.verifyEmailCode(email, code)) {
+            return Result.error("验证码错误或已过期");
+        }
+
+        // 验证通过，更新用户邮箱
+        User current = UserHolder.getUser();
+        if (current == null) {
+            return Result.error("用户未登录");
+        }
+
+        User updateUser = new User();
+        updateUser.setEmail(email);
+        userService.updateUserInfo(current.getId(), updateUser);
+
+        return Result.success(null);
+    }
+
+    /**
+     * 修改密码
+     */
+    @ApiOperation("修改密码")
+    @PutMapping("/changePassword")
+    public Result<Void> changePassword(@RequestBody java.util.Map<String, String> body) {
+        User current = UserHolder.getUser();
+        if (current == null) {
+            return Result.error("用户未登录");
+        }
+
+        String oldPassword = body.get("oldPassword");
+        String newPassword = body.get("newPassword");
+
+        if (oldPassword == null || oldPassword.isEmpty()) {
+            return Result.error("旧密码不能为空");
+        }
+        if (newPassword == null || newPassword.isEmpty()) {
+            return Result.error("新密码不能为空");
+        }
+        if (newPassword.length() < 6) {
+            return Result.error("新密码长度不能少于6位");
+        }
+
+        boolean success = userService.changePassword(current.getId(), oldPassword, newPassword);
+        if (!success) {
+            return Result.error("旧密码错误");
+        }
+
+        return Result.success(null);
+    }
 }
